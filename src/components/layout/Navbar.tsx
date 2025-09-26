@@ -47,7 +47,7 @@ export default function Navbar() {
     { name: "HOME WEAR", icon: homeIcon },
     { name: "DUPATTA", icon: dupattaIcon },
     { name: "ACCESSORIES", icon: accessoriesIcon },
-    { name: "CHUDI", icon: chudiIcon },
+   
   ];
 
   return (

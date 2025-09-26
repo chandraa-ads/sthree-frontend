@@ -13,8 +13,15 @@ const AccountInfo: React.FC = () => {
     { product: "Jeans", size: "32", quantity: 1, price: 1200 },
   ]);
 
+  const [paymentMethod, setPaymentMethod] = useState<string>("");
+
   const confirmOrder = () => {
-    alert("✅ Order Confirmed Successfully!");
+    if (!paymentMethod) {
+      alert("⚠️ Please select a payment method before confirming the order!");
+      return;
+    }
+
+    alert(`✅ Order Confirmed Successfully!\nPayment Method: ${paymentMethod}`);
   };
 
   return (
@@ -22,8 +29,8 @@ const AccountInfo: React.FC = () => {
       {/* Left Profile */}
       <div className="w-full md:w-72 bg-pink-100 p-6 text-center border-b md:border-b-0 md:border-r border-gray-200">
         <img
-          src="https://via.placeholder.com/120"
-          alt="User"
+          src="/logo.png"
+          alt="Logo"
           className="w-28 h-28 rounded-xl object-cover mx-auto mb-4"
         />
         <h2 className="text-xl font-semibold">Mark Cole</h2>
@@ -57,7 +64,11 @@ const AccountInfo: React.FC = () => {
         {/* Payment */}
         <div className="mb-6">
           <label className="block text-sm font-medium mb-1">Payment Method</label>
-          <select className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+          <select
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+          >
             <option value="">-- Select --</option>
             <option value="Credit Card">Credit Card</option>
             <option value="UPI">UPI</option>
