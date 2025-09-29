@@ -11,7 +11,7 @@ import kidsIcon from "../../assets/icon/kids.png";
 import homeIcon from "../../assets/icon/home.svg";
 import dupattaIcon from "../../assets/icon/dupatta.png";
 import accessoriesIcon from "../../assets/icon/accessories.png";
-import chudiIcon from "../../assets/icon/chudi.png";
+import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,48 +25,58 @@ export default function Navbar() {
 
     let x = 0;
     const speed = 0.5;
+    let frameId: number;
 
     const step = () => {
       x -= speed;
       if (Math.abs(x) >= el.scrollWidth / 2) x = 0;
       el.style.transform = `translateX(${x}px)`;
-      requestAnimationFrame(step);
+      frameId = requestAnimationFrame(step);
     };
 
-    requestAnimationFrame(step);
-    return () => {
-      x = 0;
-    };
+    frameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frameId); // ✅ Proper cleanup
   }, []);
 
   const categories = [
-    { name: "SAREE", icon: sareeIcon },
-    { name: "SALWAR", icon: salwarIcon },
-    { name: "TOP AND KURUTHA", icon: kuruthaIcon },
-    { name: "KIDS WEAR", icon: kidsIcon },
-    { name: "HOME WEAR", icon: homeIcon },
-    { name: "DUPATTA", icon: dupattaIcon },
-    { name: "ACCESSORIES", icon: accessoriesIcon },
-   
+    { name: "SAREE", icon: sareeIcon, path: "/saree" },
+    { name: "SALWAR", icon: salwarIcon, path: "/salwar" },
+    { name: "TOP AND KURUTHA", icon: kuruthaIcon, path: "/kurutha" },
+    { name: "KIDS WEAR", icon: kidsIcon, path: "/kids" },
+    { name: "HOME WEAR", icon: homeIcon, path: "/homewear" },
+    { name: "DUPATTA", icon: dupattaIcon, path: "/dupatta" },
+    { name: "ACCESSORIES", icon: accessoriesIcon, path: "/accessories" },
   ];
 
   return (
     <>
       {/* Running banner */}
       <div className="w-full bg-black text-white text-sm py-1 overflow-hidden">
-        <div ref={bannerRef} className="flex whitespace-nowrap" style={{ willChange: "transform" }}>
-          {Array(8).fill("END OF SEASON SALE LIVE NOW UPTO 75% DISCOUNT •").map((text, i) => (
-            <span key={i} className="px-8">{text}</span>
-          ))}
+        <div
+          ref={bannerRef}
+          className="flex whitespace-nowrap"
+          style={{ willChange: "transform" }}
+        >
+          {Array(8)
+            .fill("END OF SEASON SALE LIVE NOW UPTO 75% DISCOUNT •")
+            .map((text, i) => (
+              <span key={i} className="px-8">
+                {text}
+              </span>
+            ))}
         </div>
       </div>
 
       {/* Navbar */}
       <nav className="bg-[#fdfaf3] border-b border-gray-200 w-full sticky top-0 z-50 font-serif">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-20">
-          <a href="/" className="flex items-center">
-            <img src={logoImg} alt="Logo" className="h-12 w-auto object-contain" />
-          </a>
+          <Link to="/" className="flex items-center">
+            <img
+              src={logoImg}
+              alt="Logo"
+              className="h-12 w-auto object-contain"
+            />
+          </Link>
 
           {/* Search */}
           <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
@@ -84,8 +94,8 @@ export default function Navbar() {
               onClick={() => setIsLoginOpen(true)}
               className="p-1 hover:text-green-600 transition-colors"
             >
-<User className="w-6 h-6 text-gray-700 cursor-pointer" onClick={() => setIsLoginOpen(true)} />
-              </button>
+              <User className="w-6 h-6 text-gray-700 cursor-pointer" />
+            </button>
             <ShoppingCart className="w-6 h-6 text-gray-700 cursor-pointer hover:text-green-600" />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -99,10 +109,18 @@ export default function Navbar() {
         {/* Categories (desktop) */}
         <div className="hidden md:flex justify-center space-x-8 py-3 text-gray-800 font-medium">
           {categories.map((cat) => (
-            <a key={cat.name} href="#" className="flex items-center space-x-2 hover:text-green-600">
-              <img src={cat.icon} alt={cat.name} className="w-6 h-6 object-contain" />
+            <Link
+              key={cat.name}
+              to={cat.path}
+              className="flex items-center space-x-2 hover:text-green-600"
+            >
+              <img
+                src={cat.icon}
+                alt={cat.name}
+                className="w-6 h-6 object-contain"
+              />
               <span>{cat.name}</span>
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -126,10 +144,18 @@ export default function Navbar() {
                 </div>
 
                 {categories.map((cat) => (
-                  <a key={cat.name} href="#" className="flex items-center space-x-2 text-gray-800 hover:text-green-600">
-                    <img src={cat.icon} alt={cat.name} className="w-6 h-6 object-contain" />
+                  <Link
+                    key={cat.name}
+                    to={cat.path}
+                    className="flex items-center space-x-2 text-gray-800 hover:text-green-600"
+                  >
+                    <img
+                      src={cat.icon}
+                      alt={cat.name}
+                      className="w-6 h-6 object-contain"
+                    />
                     <span>{cat.name}</span>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </motion.div>

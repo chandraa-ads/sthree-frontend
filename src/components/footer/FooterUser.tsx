@@ -12,24 +12,24 @@ const FooterUser: React.FC = () => {
           <h3 className="text-black font-bold mb-4">Exclusive</h3>
           <p className="mb-2">Subscribe</p>
           <p className="mb-4">Get 10% off your first order</p>
-         <form className="flex" onSubmit={(e) => e.preventDefault()}>
-  <label htmlFor="email" className="sr-only">
-    Enter your email
-  </label>
-  <input
-    id="email"
-    type="email"
-    placeholder="Enter your email"
-    required
-    className="px-3 py-2 w-2/3 border border-gray-300 rounded-l-md text-black focus:outline-none focus:border-rose-400"
-  />
-  <button
-    type="submit"
-    className="px-4 py-2 border border-gray-300 border-l-0 bg-white text-black rounded-r-md hover:bg-rose-400 hover:text-white transition"
-  >
-    &#10148;
-  </button>
-</form>
+          <form className="flex" onSubmit={(e) => e.preventDefault()}>
+            <label htmlFor="email" className="sr-only">
+              Enter your email
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              required
+              className="px-3 py-2 w-2/3 border border-gray-300 rounded-l-md text-black focus:outline-none focus:border-rose-400"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 border border-gray-300 border-l-0 bg-white text-black rounded-r-md hover:bg-rose-400 hover:text-white transition"
+            >
+              &#10148;
+            </button>
+          </form>
         </div>
 
         {/* Support */}
