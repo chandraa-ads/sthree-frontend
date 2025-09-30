@@ -95,7 +95,7 @@ const FooterUser: React.FC = () => {
 
       {/* Footer Bottom */}
       <div className="bg-neutral-900 text-gray-400 text-center py-4 text-sm">
-        © Copyright Rimel {new Date().getFullYear()}. All rights reserved.
+        © Copyright Sth Ree {new Date().getFullYear()}. All rights reserved.
       </div>
     </footer>
   );

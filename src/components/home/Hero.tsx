@@ -1,10 +1,15 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "../ui/Button";
 
 export function Hero() {
+  // Shop Now scroll handler
+  const handleShopNow = () => {
+    const section = document.getElementById("products");
+    section?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <section className="relative min-h-[80vh] flex flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-coral/10 via-white to-turquoise/10">
       {/* Background Elements */}
@@ -21,6 +26,7 @@ export function Hero() {
         />
       </div>
 
+      {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -41,7 +47,7 @@ export function Hero() {
             </span>
           </motion.div>
 
-          {/* Main Heading */}
+          {/* Heading */}
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -70,13 +76,24 @@ export function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6"
+            className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 mt-6"
           >
-            <Button size="lg" className="group">
+            {/* Shop Now - scrolls down */}
+            <Button
+              size="lg"
+              className="group px-10 py-5 text-lg font-semibold shadow-lg hover:shadow-xl transition-all"
+              onClick={handleShopNow}
+            >
               Shop Now
-              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="outline" size="lg">
+
+            {/* View Collections */}
+            <Button
+              variant="outline"
+              size="lg"
+              className="px-10 py-5 text-lg font-semibold border-2"
+            >
               View Collections
             </Button>
           </motion.div>

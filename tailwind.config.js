@@ -10,6 +10,9 @@ export default {
         'soft-bg': '#F7F9FC',
         'text-primary': '#2C3E50',
       },
+      backgroundImage: {
+        'shop-gradient': 'linear-gradient(135deg, #FDE2FF 0%, #FAD9FF 50%, #F9E2FF 100%)',
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         heading: ['Poppins', 'system-ui', 'sans-serif'],
@@ -21,28 +24,7 @@ export default {
       borderRadius: {
         '4xl': '2rem',
       },
-      keyframes: {
-        marquee: {
-          '0%': { transform: 'translateX(0%)' },
-          '100%': { transform: 'translateX(-50%)' },
-        },
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
-        },
-        zoomIn: {
-          '0%': { transform: 'scale(0.9)' },
-          '100%': { transform: 'scale(1)' },
-        },
-      },
-      animation: {
-        'bounce-gentle': 'bounce 2s infinite',
-        'pulse-slow': 'pulse 3s infinite',
-        marquee: 'marquee 15s linear infinite',
-        fadeIn: 'fadeIn 0.3s ease-in-out forwards',
-        zoomIn: 'zoomIn 0.3s ease-in-out forwards',
-      },
     },
   },
-  plugins: [ ],
+  plugins: [],
 };

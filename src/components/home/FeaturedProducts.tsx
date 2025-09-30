@@ -21,40 +21,6 @@ type Product = {
 };
 
 // ----------------------
-// Testimonials Data
-// ----------------------
-const testimonials = [
-  {
-    id: 1,
-    name: "Person Name",
-    profession: "Profession",
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-    text: "Lorem ipsum dolor sit amet elit, sed do eiusmod tempor ut labore et dolore magna aliqua.",
-  },
-  {
-    id: 2,
-    name: "Person Name",
-    profession: "Profession",
-    image: "https://randomuser.me/api/portraits/women/44.jpg",
-    text: "Lorem ipsum dolor sit amet elit, sed do eiusmod tempor ut labore et dolore magna aliqua.",
-  },
-  {
-    id: 3,
-    name: "Person Name",
-    profession: "Profession",
-    image: "https://randomuser.me/api/portraits/women/68.jpg",
-    text: "Lorem ipsum dolor sit amet elit, sed do eiusmod tempor ut labore et dolore magna aliqua.",
-  },
-  {
-    id: 4,
-    name: "Person Name",
-    profession: "Profession",
-    image: "https://randomuser.me/api/portraits/men/64.jpg",
-    text: "Lorem ipsum dolor sit amet elit, sed do eiusmod tempor ut labore et dolore magna aliqua.",
-  },
-];
-
-// ----------------------
 // Featured Products Component
 // ----------------------
 export function FeaturedProducts() {
@@ -68,7 +34,6 @@ export function FeaturedProducts() {
         if (!res.ok) throw new Error("Failed to fetch products");
         const data: Product[] = await res.json();
 
-        // Filter only women's wear + jewellery
         const filtered = data.filter(
           (product) =>
             product.category === "jewelery" ||
@@ -87,7 +52,7 @@ export function FeaturedProducts() {
   }, []);
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-cream font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Heading */}
         <motion.div
@@ -127,7 +92,7 @@ export function FeaturedProducts() {
                 transition={{ duration: 0.6, delay: index * 0.05 }}
                 className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-transform transform hover:-translate-y-2 flex flex-col"
               >
-                {/* Image */}
+                {/* Product Image */}
                 <div className="relative">
                   <img
                     src={product.image}
@@ -140,7 +105,7 @@ export function FeaturedProducts() {
                   </div>
                 </div>
 
-                {/* Details */}
+                {/* Product Details */}
                 <div className="p-6 flex flex-col flex-1">
                   <h3 className="text-lg font-bold mb-2 truncate">{product.title}</h3>
                   <p className="text-gray-800 font-semibold text-lg mb-4">
@@ -203,58 +168,6 @@ export function FeaturedProducts() {
             </div>
           ))}
         </motion.div>
-      </div>
-    </section>
-  );
-}
-
-// ----------------------
-// Testimonials Component
-// ----------------------
-export function Testimonials() {
-  return (
-    <section className="py-12 bg-white overflow-hidden">
-      <div className="text-center mb-10">
-        <span className="px-3 py-1 text-sm border rounded-full">TESTIMONIAL</span>
-        <h2 className="text-3xl md:text-4xl font-bold italic mt-4">
-          What Our Customers Say!
-        </h2>
-      </div>
-
-      <div className="flex gap-6 justify-center flex-wrap">
-        {testimonials.map((t) => (
-          <div
-            key={t.id}
-            className="w-[300px] bg-[#fdfaf6] border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-xl transition"
-          >
-            {/* User Info */}
-            <div className="flex items-center gap-4 mb-4">
-              <img
-                src={t.image}
-                alt={t.name}
-                className="w-14 h-14 rounded-full object-cover"
-              />
-              <div>
-                <h3 className="font-bold text-lg">{t.name}</h3>
-                <p className="text-gray-500 text-sm">{t.profession}</p>
-              </div>
-            </div>
-
-            {/* Rating */}
-            <div className="flex mb-4 text-yellow-500">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <span key={i}>★</span>
-              ))}
-            </div>
-
-            {/* Review Text */}
-            <p className="text-gray-600 text-sm">{t.text}</p>
-
-            <div className="text-4xl text-gray-300 font-serif text-right mt-4">
-              ❝
-            </div>
-          </div>
-        ))}
       </div>
     </section>
   );
