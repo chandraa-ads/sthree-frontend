@@ -1,0 +1,142 @@
+import React from "react";
+import { useCart } from "../../contexts/CartContext";
+import { Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+const ShoppingCart: React.FC = () => {
+  const { cartItems, updateCartItem, removeItem } = useCart();
+
+  const subtotal = cartItems.reduce(
+    (acc, item) => acc + Number(item.price) * item.quantity,
+    0
+  );
+  const deliveryFee = cartItems.length > 0 ? 50 : 0;
+  const totalAmount = subtotal + deliveryFee;
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* LEFT SIDE - CART ITEMS */}
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-md p-6">
+          <h1 className="text-2xl font-semibold mb-6 border-b pb-3">Shopping Cart</h1>
+
+          {cartItems.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-gray-500 text-lg">Your cart is empty 😕</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {cartItems.map((item) => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col sm:flex-row sm:items-center gap-6 border-b pb-6"
+                >
+                  {/* Product Image */}
+                  <img
+                    src={item.image_url || "/default-product.png"}
+                    alt={item.name}
+                    className="w-28 h-28 object-cover rounded-lg border"
+                  />
+
+                  {/* Product Info */}
+                <div className="flex-1">
+  <h4 className="font-semibold text-lg">{item.name}</h4>
+
+  {/* Trash button above price */}
+  <div className="flex justify-end mt-1">
+    <button
+      onClick={() => removeItem(item.id)}
+      className="text-red-500 hover:text-red-600 transition"
+      title="Remove item"
+    >
+      <Trash2 size={18} />
+    </button>
+  </div>
+
+  <p className="text-gray-600 mt-1 text-sm">₹{item.price}</p>
+
+  {/* Variant details */}
+  <div className="text-xs text-gray-500 mt-2 space-y-1">
+    {item.size && (
+      <p>
+        <span className="font-medium text-gray-700">Size:</span> {item.size}
+      </p>
+    )}
+    {item.color && (
+      <p>
+        <span className="font-medium text-gray-700">Color:</span> {item.color}
+      </p>
+    )}
+    {item.variant_name && (
+      <p>
+        <span className="font-medium text-gray-700">Variant:</span>{" "}
+        {item.variant_name}
+      </p>
+    )}
+  </div>
+
+  {/* Quantity Controls */}
+  <div className="flex items-center mt-3">
+    <button
+      onClick={() => updateCartItem(item, item.quantity - 1)}
+      className="px-3 py-1 border rounded-l hover:bg-gray-100"
+    >
+      -
+    </button>
+    <span className="px-4 py-1 border-t border-b">{item.quantity}</span>
+    <button
+      onClick={() => updateCartItem(item, item.quantity + 1)}
+      className="px-3 py-1 border rounded-r hover:bg-gray-100"
+    >
+      +
+    </button>
+  </div>
+</div>
+
+
+                  {/* Item total */}
+                  <div className="sm:w-32 text-right font-semibold text-gray-800">
+                    ₹{(Number(item.price) * item.quantity).toFixed(2)}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT SIDE - ORDER SUMMARY */}
+        {cartItems.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-md p-6 h-fit sticky top-10">
+            <h2 className="text-xl font-semibold border-b pb-3 mb-4">Order Summary</h2>
+
+            <div className="space-y-3 text-gray-700">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₹{subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Delivery Fee</span>
+                <span>₹{deliveryFee.toFixed(2)}</span>
+              </div>
+              <div className="border-t pt-3 flex justify-between font-semibold text-lg">
+                <span>Total</span>
+                <span>₹{totalAmount.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button
+              className="w-full mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
+              onClick={() => alert("Proceeding to checkout...")}
+            >
+              Proceed to Checkout
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ShoppingCart;

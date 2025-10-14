@@ -1,8 +1,9 @@
+// src/components/ProductCarousel.tsx
+
 import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-// import { Product } from '../data/products';
-import { Product } from './data/products';
+import { Product } from './types/product';
 import { ProductCard } from './ProductCard';
 
 interface ProductCarouselProps {
@@ -11,7 +12,11 @@ interface ProductCarouselProps {
   autoScroll?: boolean;
 }
 
-export function ProductCarousel({ products, title, autoScroll = true }: ProductCarouselProps) {
+export function ProductCarousel({
+  products,
+  title,
+  autoScroll = true
+}: ProductCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -25,7 +30,7 @@ export function ProductCarousel({ products, title, autoScroll = true }: ProductC
       if (!isHovered) {
         const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
         const currentScroll = scrollContainer.scrollLeft;
-        
+
         if (currentScroll >= maxScroll) {
           scrollContainer.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
@@ -54,7 +59,8 @@ export function ProductCarousel({ products, title, autoScroll = true }: ProductC
   };
 
   return (
-    <div className="py-8">
+    <div className="w-full">
+      {/* Carousel Title + Controls */}
       <div className="flex items-center justify-between mb-6">
         <motion.h2
           initial={{ opacity: 0, x: -20 }}
@@ -63,7 +69,7 @@ export function ProductCarousel({ products, title, autoScroll = true }: ProductC
         >
           {title}
         </motion.h2>
-        
+
         <div className="flex space-x-2">
           <motion.button
             whileHover={{ scale: 1.1 }}
@@ -78,6 +84,7 @@ export function ProductCarousel({ products, title, autoScroll = true }: ProductC
           >
             <ChevronLeft className="w-5 h-5" />
           </motion.button>
+
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -94,6 +101,7 @@ export function ProductCarousel({ products, title, autoScroll = true }: ProductC
         </div>
       </div>
 
+      {/* Carousel Items */}
       <div
         ref={scrollRef}
         onMouseEnter={() => setIsHovered(true)}

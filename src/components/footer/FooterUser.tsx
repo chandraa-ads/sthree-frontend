@@ -1,104 +1,182 @@
 import React from "react";
-import { FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 
-const FooterUser: React.FC = () => {
+export function Footer() {
+  const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
+
+  const quickLinks = [
+    { name: "Home", path: "/" },
+    { name: "Sarees", path: "/category/saree" },
+    { name: "Salwar", path: "/category/salwar" },
+    { name: "Top & Kurtis", path: "/category/top & kurtis" },
+    { name: "Accessories", path: "/category/accessories" },
+    { name: "Mens", path: "/category/mens" },
+  ];
+
+  const customerServiceLinks = [
+    { name: "Size Guide", path: "/size-guide" },
+    { name: "Shipping Info", path: "/shipping-info" },
+    { name: "Returns & Exchanges", path: "/returns" },
+    { name: "Care Instructions", path: "/care-instructions" },
+  ];
+
+  const bottomLinks = [
+    { name: "Privacy Policy", path: "/privacy-policy" },
+    { name: "Terms of Service", path: "/terms" },
+    { name: "Cookie Policy", path: "/cookie-policy" },
+  ];
+
   return (
-    <footer className="bg-[#FFF8E7] text-black">
-      {/* Main Footer Content */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-10 px-6 md:px-16 py-12">
-        
-        {/* Exclusive */}
-        <div>
-          <h3 className="text-black font-bold mb-4">Exclusive</h3>
-          <p className="mb-2">Subscribe</p>
-          <p className="mb-4">Get 10% off your first order</p>
-          <form className="flex" onSubmit={(e) => e.preventDefault()}>
-            <label htmlFor="email" className="sr-only">
-              Enter your email
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              required
-              className="px-3 py-2 w-2/3 border border-gray-300 rounded-l-md text-black focus:outline-none focus:border-rose-400"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2 border border-gray-300 border-l-0 bg-white text-black rounded-r-md hover:bg-rose-400 hover:text-white transition"
-            >
-              &#10148;
-            </button>
-          </form>
-        </div>
+    <footer className="bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Brand Section */}
+          <div className="space-y-4">
+            <motion.div whileHover={{ scale: 1.05 }} className="flex items-center">
+              <img src="../src/assets/icon/Sth_W.svg" alt="SthRee" className="h-10 w-auto" />
+              <span className="ml-2 text-xl font-bold transition-colors duration-300 hover:text-pink-600">
+                SthRee
+              </span>
+            </motion.div>
 
-        {/* Support */}
-        <div>
-          <h3 className="text-black font-bold mb-4">Support</h3>
-          <address className="not-italic text-black">
-            <p className="mb-2">65, Tatabad 1st Street,</p>
-            <p className="mb-2">Coimbatore - 641 012</p>
-            <p className="mb-2">exclusive@gmail.com</p>
-            <p>91+ 89032 84455</p>
-          </address>
-        </div>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Discover the finest collection of traditional and contemporary sarees. Crafted with love, delivered with care.
+            </p>
 
-        {/* Account */}
-        <div>
-          <h3 className="text-black font-bold mb-4">Account</h3>
-          <ul className="space-y-2 text-black">
-            {["My Account", "Login / Register", "Cart", "Wishlist", "Shop"].map(
-              (item) => (
-                <li key={item}>
-                  <a href="#" className="hover:text-rose-400 transition">
-                    {item}
-                  </a>
+            <div className="flex space-x-4">
+              {[{ Icon: Facebook, link: "#" }, { Icon: Twitter, link: "#" }, { Icon: Instagram, link: "#" }, { Icon: Youtube, link: "#" }].map(({ Icon, link }, idx) => (
+                <motion.a
+                  key={idx}
+                  whileHover={{ scale: 1.1 }}
+                  href={link}
+                  className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors"
+                >
+                  <Icon className="w-4 h-4" />
+                </motion.a>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2">
+              {quickLinks.map((link) => (
+                <li key={link.name}>
+                  <motion.button
+                    whileHover={{ x: 5 }}
+                    onClick={() => navigate(link.path)}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                  >
+                    {link.name}
+                  </motion.button>
                 </li>
-              )
-            )}
-          </ul>
-        </div>
+              ))}
+            </ul>
+          </div>
 
-        {/* Quick Links */}
-        <div>
-          <h3 className="text-black font-bold mb-4">Quick Links</h3>
-          <ul className="space-y-2 text-black">
-            {["Privacy Policy", "Terms Of Use", "FAQ", "Contact"].map((item) => (
-              <li key={item}>
-                <a href="#" className="hover:text-rose-400 transition">
-                  {item}
+          {/* Customer Service */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
+            <ul className="space-y-2">
+              {customerServiceLinks.map((link) => (
+                <li key={link.name}>
+                  <motion.button
+                    whileHover={{ x: 5 }}
+                    onClick={() => navigate(link.path)}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                  >
+                    {link.name}
+                  </motion.button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <MapPin className="w-4 h-4 text-pink-500 flex-shrink-0" />
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=65,+Tatabad+1st+Street,+Coimbatore+-+641+012"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 text-sm hover:underline"
+                >
+                  65, Tatabad 1st Street, Coimbatore - 641 012
                 </a>
-              </li>
-            ))}
-          </ul>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Phone className="w-4 h-4 text-pink-500 flex-shrink-0" />
+                <a
+                  href="https://wa.me/918903284455"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 text-sm hover:underline"
+                >
+                  +91 89032 84455
+                </a>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Mail className="w-4 h-4 text-pink-500 flex-shrink-0" />
+                <a
+                  href="mailto:sujangnanaolivu@gmail.com"
+                  className="text-gray-400 text-sm hover:underline"
+                >
+                  sujangnanaolivu@gmail.com
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Social Icons */}
-        <div>
-          <h3 className="text-black font-bold mb-4">Follow Us</h3>
-          <div className="flex space-x-4 text-black text-xl">
-            <a href="#" aria-label="Facebook" className="hover:text-rose-400 transition">
-              <FaFacebookF />
-            </a>
-            <a href="#" aria-label="Twitter" className="hover:text-rose-400 transition">
-              <FaTwitter />
-            </a>
-            <a href="#" aria-label="Instagram" className="hover:text-rose-400 transition">
-              <FaInstagram />
-            </a>
-            <a href="#" aria-label="LinkedIn" className="hover:text-rose-400 transition">
-              <FaLinkedinIn />
-            </a>
+        {/* Bottom Section */}
+        <div className="border-t border-gray-800 mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="text-gray-400 text-sm">
+              © {currentYear} SthRee Palace. All rights reserved.
+            </div>
+            <div className="flex space-x-6 text-sm">
+              {bottomLinks.map((link) => (
+                <motion.button
+                  key={link.name}
+                  whileHover={{ y: -2 }}
+                  onClick={() => navigate(link.path)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  {link.name}
+                </motion.button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Footer Bottom */}
-      <div className="bg-neutral-900 text-gray-400 text-center py-4 text-sm">
-        © Copyright Sth Ree {new Date().getFullYear()}. All rights reserved.
+      {/* Payment Methods / Powered by Section */}
+      <div className="bg-gray-800 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-center text-center space-y-2">
+            <div className="flex items-center space-x-2">
+              <a
+                href="#"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 hover:underline"
+              >
+                <img src="src/assets/icon/web media 6.svg" alt="Web Media 6" className="h-6 w-auto" />
+                <span className="text-gray-400 text-sm">Powered by Media Web 6</span>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
   );
-};
-
-export default FooterUser;
+}

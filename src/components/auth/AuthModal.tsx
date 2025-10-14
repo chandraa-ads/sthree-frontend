@@ -1,231 +1,182 @@
-import React, { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Mail, Lock, User, Eye, EyeOff } from 'lucide-react'
-import { useAuth } from '../../contexts/AuthContext'
-import { Button } from '../ui/Button'
-import { Input } from '../ui/Input'
+import React, { useState } from "react";
+import { X, ArrowLeft } from "lucide-react";
 
-interface AuthModalProps {
-  isOpen: boolean
-  onClose: () => void
-}
+export const AuthModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [isSignup, setIsSignup] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [user, setUser] = useState<{ name: string; email: string } | null>(
+    JSON.parse(localStorage.getItem("loggedInUser") || "null")
+  );
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const [mode, setMode] = useState<'signin' | 'signup' | 'forgot'>('signin')
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    username: '',
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const handleLogin = () => {
+    const stored = localStorage.getItem("loggedInUser");
+    if (!stored) return alert("No account found. Please sign up first.");
 
-  const { signIn, signUp, resetPassword } = useAuth()
+    const savedUser = JSON.parse(stored);
+    if (savedUser.email === email && savedUser.password === password) {
+      setUser(savedUser);
+      alert("Login successful!");
+      onClose();
+    } else alert("Invalid email or password!");
+  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setSuccess('')
+  const handleSignup = () => {
+    if (!name || !email || !password) return alert("Please fill all fields.");
+    const newUser = { name, email, password };
+    localStorage.setItem("loggedInUser", JSON.stringify(newUser));
+    alert("Signup successful! You can now log in.");
+    setIsSignup(false);
+  };
 
-    try {
-      if (mode === 'signin') {
-        const { error } = await signIn(formData.email, formData.password)
-        if (error) throw error
-        onClose()
-      } else if (mode === 'signup') {
-        const { error } = await signUp(formData.email, formData.password, formData.username)
-        if (error) throw error
-        setSuccess('Account created! Please check your email to verify your account.')
-      } else if (mode === 'forgot') {
-        const { error } = await resetPassword(formData.email)
-        if (error) throw error
-        setSuccess('Password reset email sent! Check your inbox.')
-      }
-    } catch (error: any) {
-      setError(error.message || 'An error occurred')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleLogout = () => {
+    setUser(null);
+    alert("Logged out successfully!");
+  };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }))
-  }
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="w-[600px] min-h-[500px] max-h-[90vh] bg-white rounded-xl relative shadow-lg flex overflow-hidden flex-col md:flex-row">
+        {/* Close Button */}
+        <button
+          className="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full p-1 z-20"
           onClick={onClose}
         >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
+          <X size={20} />
+        </button>
+
+        {/* Greeting */}
+        {user && (
+          <div className="absolute top-3 left-4 text-lg font-semibold text-cyan-700 z-20">
+            Hello {user.name || user.email.split("@")[0]}!
+          </div>
+        )}
+
+        {/* Image Banner */}
+        <div
+          className={`absolute right-0 top-0 w-1/2 h-full transition-transform duration-500 z-10 ${
+            isSignup ? "-translate-x-full" : "translate-x-0"
+          }`}
+        >
+          <img
+            src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80"
+            alt="banner"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* LOGIN FORM */}
+        <div
+          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${
+            isSignup ? "-translate-x-full" : "translate-x-0"
+          }`}
+        >
+          <h1 className="text-xl font-semibold">Log In</h1>
+          <p className="text-xs text-gray-600">
+            Login to your account to access features and explore content.
+          </p>
+          <input
+            type="email"
+            placeholder="Enter Your Email"
+            className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <div className="flex items-center justify-between">
+            <a href="#" className="text-xs text-cyan-700">
+              Forgot Password?
+            </a>
+            <button
+              className="bg-cyan-700 text-white rounded-md px-4 py-1"
+              onClick={handleLogin}
+            >
+              Login
+            </button>
+          </div>
+
+          <span className="text-xs mt-4">
+            Don’t have an account yet?{" "}
+            <span
+              className="text-cyan-700 cursor-pointer hover:underline"
+              onClick={() => setIsSignup(true)}
+            >
+              Sign Up
+            </span>
+          </span>
+        </div>
+
+        {/* SIGNUP FORM */}
+        <div
+          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${
+            isSignup ? "translate-x-full" : "translate-x-[200%]"
+          }`}
+        >
+          <button
+            className="absolute top-3 left-3 bg-gray-200 hover:bg-gray-300 rounded-full p-1 z-20"
+            onClick={() => setIsSignup(false)}
           >
-            {/* Header */}
-            <div className="relative bg-gradient-to-r from-coral to-turquoise p-6 text-white">
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 p-1 hover:bg-white/20 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <h2 className="text-2xl font-bold">
-                {mode === 'signin' && 'Welcome Back'}
-                {mode === 'signup' && 'Create Account'}
-                {mode === 'forgot' && 'Reset Password'}
-              </h2>
-              <p className="text-white/80 mt-1">
-                {mode === 'signin' && 'Sign in to your account'}
-                {mode === 'signup' && 'Join our community today'}
-                {mode === 'forgot' && 'Enter your email to reset password'}
-              </p>
-            </div>
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="text-xl font-semibold">Sign Up</h1>
+          <input
+            type="text"
+            placeholder="User Name"
+            className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <input
+            type="email"
+            placeholder="Enter Your Email"
+            className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Enter Your Password"
+            className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            className="bg-cyan-700 text-white rounded-md px-4 py-1"
+            onClick={handleSignup}
+          >
+            Register
+          </button>
 
-            {/* Form */}
-            <div className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {mode === 'signup' && (
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      name="username"
-                      placeholder="Username"
-                      value={formData.username}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coral/50 focus:border-coral transition-all"
-                      required
-                    />
-                  </div>
-                )}
+          <span className="text-xs mt-2">
+            Already have an account?{" "}
+            <span
+              className="text-cyan-700 cursor-pointer hover:underline"
+              onClick={() => setIsSignup(false)}
+            >
+              Login here
+            </span>
+          </span>
 
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email address"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coral/50 focus:border-coral transition-all"
-                    required
-                  />
-                </div>
-
-                {mode !== 'forgot' && (
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      placeholder="Password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coral/50 focus:border-coral transition-all"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                )}
-
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-
-                {success && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm"
-                  >
-                    {success}
-                  </motion.div>
-                )}
-
-                <Button
-                  type="submit"
-                  loading={loading}
-                  className="w-full py-3"
-                >
-                  {mode === 'signin' && 'Sign In'}
-                  {mode === 'signup' && 'Create Account'}
-                  {mode === 'forgot' && 'Send Reset Email'}
-                </Button>
-              </form>
-
-              {/* Footer Links */}
-              <div className="mt-6 text-center space-y-2">
-                {mode === 'signin' && (
-                  <>
-                    <button
-                      onClick={() => setMode('forgot')}
-                      className="text-sm text-coral hover:underline"
-                    >
-                      Forgot your password?
-                    </button>
-                    <div className="text-sm text-gray-600">
-                      Don't have an account?{' '}
-                      <button
-                        onClick={() => setMode('signup')}
-                        className="text-coral hover:underline font-medium"
-                      >
-                        Sign up
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {mode === 'signup' && (
-                  <div className="text-sm text-gray-600">
-                    Already have an account?{' '}
-                    <button
-                      onClick={() => setMode('signin')}
-                      className="text-coral hover:underline font-medium"
-                    >
-                      Sign in
-                    </button>
-                  </div>
-                )}
-
-                {mode === 'forgot' && (
-                  <button
-                    onClick={() => setMode('signin')}
-                    className="text-sm text-coral hover:underline"
-                  >
-                    Back to sign in
-                  </button>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  )
-}
+          {user && (
+            <button
+              className="mt-6 bg-red-600 text-white rounded-md px-4 py-1"
+              onClick={handleLogout}
+              type="button"
+            >
+              Logout
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};

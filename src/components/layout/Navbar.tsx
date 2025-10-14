@@ -1,24 +1,51 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, User, Search, Menu, X } from "lucide-react";
+import { ShoppingCart, User, Search, Menu, X, Heart } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import LoginSignup from "../auth/LoginSignup";
 
-import logoImg from "../../assets/icon/logo.svg";
+import logoImg from "../../assets/icon/sth_ree.svg";
 import sareeIcon from "../../assets/icon/Saree.png";
 import salwarIcon from "../../assets/icon/salwar.png";
 import kuruthaIcon from "../../assets/icon/kurutha.png";
 import kidsIcon from "../../assets/icon/kids.png";
-import homeIcon from "../../assets/icon/home.svg";
+import homeIcon from "../../assets/icon/home.png";
 import dupattaIcon from "../../assets/icon/dupatta.png";
 import accessoriesIcon from "../../assets/icon/accessories.png";
-import { Link } from "react-router-dom";
+import mens from "../../assets/icon/mens.png";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Running banner animation
+  const categories = [
+    { name: "SAREE", icon: sareeIcon },
+    { name: "SALWAR", icon: salwarIcon },
+    { name: "TOP & KURTIS", icon: kuruthaIcon },
+    { name: "KIDS WEAR", icon: kidsIcon },
+    { name: "HOME WEAR", icon: homeIcon },
+    { name: "DUPATTA", icon: dupattaIcon },
+    { name: "ACCESSORIES", icon: accessoriesIcon },
+    { name: "MENS", icon: mens },
+  ];
+
+  // Check login status on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("loggedInUser");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      setUserName(user.name);
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  // Running banner scroll effect
   useEffect(() => {
     const el = bannerRef.current;
     if (!el) return;
@@ -35,54 +62,45 @@ export default function Navbar() {
     };
 
     frameId = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frameId); // ✅ Proper cleanup
+    return () => cancelAnimationFrame(frameId);
   }, []);
 
-  const categories = [
-    { name: "SAREE", icon: sareeIcon, path: "/saree" },
-    { name: "SALWAR", icon: salwarIcon, path: "/salwar" },
-    { name: "TOP AND KURUTHA", icon: kuruthaIcon, path: "/kurutha" },
-    { name: "KIDS WEAR", icon: kidsIcon, path: "/kids" },
-    { name: "HOME WEAR", icon: homeIcon, path: "/homewear" },
-    { name: "DUPATTA", icon: dupattaIcon, path: "/dupatta" },
-    { name: "ACCESSORIES", icon: accessoriesIcon, path: "/accessories" },
-  ];
+  // Handle category selection from navigation state
+  useEffect(() => {
+    if (location.state && (location.state as any).selectedCategory) {
+      setSelectedCategory((location.state as any).selectedCategory);
+    }
+  }, [location]);
+
+  const handleCategoryClick = (category: string) => {
+    setSelectedCategory(category);
+    navigate(`/category/${category.toLowerCase()}`);
+    setIsMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("adminToken");
+    setIsLoggedIn(false);
+    setUserName(null);
+  };
 
   return (
     <>
-      {/* Running banner */}
-      <div className="w-full bg-black text-white text-sm py-1 overflow-hidden">
-        <div
-          ref={bannerRef}
-          className="flex whitespace-nowrap"
-          style={{ willChange: "transform" }}
-        >
-          {Array(8)
-            .fill("END OF SEASON SALE LIVE NOW UPTO 75% DISCOUNT •")
-            .map((text, i) => (
-              <span key={i} className="px-8">
-                {text}
-              </span>
-            ))}
-        </div>
-      </div>
-
       {/* Navbar */}
       <nav className="bg-[#fdfaf3] border-b border-gray-200 w-full sticky top-0 z-50 font-serif">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-20">
-          <Link to="/" className="flex items-center">
-            <img
-              src={logoImg}
-              alt="Logo"
-              className="h-12 w-auto object-contain"
-            />
-          </Link>
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-30">
+          {/* Logo */}
+          <button onClick={() => navigate("/")} className="flex items-center">
+            <img src={logoImg} alt="Logo" className="h-20 w-auto object-contain" />
+          </button>
 
           {/* Search */}
           <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
             <input
               type="text"
-              placeholder="Outfit Speaks Person"
+              placeholder="Search products..."
               className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
             />
             <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
@@ -90,13 +108,40 @@ export default function Navbar() {
 
           {/* Right Icons */}
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setIsLoginOpen(true)}
-              className="p-1 hover:text-green-600 transition-colors"
-            >
-              <User className="w-6 h-6 text-gray-700 cursor-pointer" />
-            </button>
-            <ShoppingCart className="w-6 h-6 text-gray-700 cursor-pointer hover:text-green-600" />
+            {!isLoggedIn ? (
+              <button
+                onClick={() => setIsLoginOpen(true)}
+                className="p-1 hover:text-green-600 transition-colors"
+              >
+                <User className="w-6 h-6 text-gray-700 cursor-pointer" />
+              </button>
+            ) : (
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-700 font-medium">
+                  Hello, {userName || "User"}!
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+
+            {/* Wishlist Icon */}
+            <Heart
+              className="w-6 h-6 text-gray-700 cursor-pointer hover:text-pink-600"
+              onClick={() => navigate("/wishlist")}
+            />
+
+            {/* Shopping Cart */}
+            <ShoppingCart
+              className="w-6 h-6 text-gray-700 cursor-pointer hover:text-green-600"
+              onClick={() => navigate("/cart")}
+            />
+
+            {/* Mobile Menu */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2 text-gray-700 hover:text-green-600 transition-colors"
@@ -109,18 +154,16 @@ export default function Navbar() {
         {/* Categories (desktop) */}
         <div className="hidden md:flex justify-center space-x-8 py-3 text-gray-800 font-medium">
           {categories.map((cat) => (
-            <Link
+            <button
               key={cat.name}
-              to={cat.path}
-              className="flex items-center space-x-2 hover:text-green-600"
+              onClick={() => handleCategoryClick(cat.name)}
+              className={`flex items-center space-x-2 hover:text-green-600 focus:outline-none ${
+                selectedCategory === cat.name ? "text-green-600 font-bold" : ""
+              }`}
             >
-              <img
-                src={cat.icon}
-                alt={cat.name}
-                className="w-6 h-6 object-contain"
-              />
+              <img src={cat.icon} alt={cat.name} className="w-6 h-6 object-contain" />
               <span>{cat.name}</span>
-            </Link>
+            </button>
           ))}
         </div>
 
@@ -137,25 +180,23 @@ export default function Navbar() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Outfit Speaks Person"
+                    placeholder="Search products..."
                     className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
                   />
                   <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
                 </div>
 
                 {categories.map((cat) => (
-                  <Link
+                  <button
                     key={cat.name}
-                    to={cat.path}
-                    className="flex items-center space-x-2 text-gray-800 hover:text-green-600"
+                    onClick={() => handleCategoryClick(cat.name)}
+                    className={`flex items-center space-x-2 text-gray-800 hover:text-green-600 focus:outline-none ${
+                      selectedCategory === cat.name ? "text-green-600 font-bold" : ""
+                    }`}
                   >
-                    <img
-                      src={cat.icon}
-                      alt={cat.name}
-                      className="w-6 h-6 object-contain"
-                    />
+                    <img src={cat.icon} alt={cat.name} className="w-6 h-6 object-contain" />
                     <span>{cat.name}</span>
-                  </Link>
+                  </button>
                 ))}
               </div>
             </motion.div>
@@ -164,7 +205,14 @@ export default function Navbar() {
       </nav>
 
       {/* Login/Signup Modal */}
-      <LoginSignup isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+      <LoginSignup
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        setIsLoggedIn={(loggedIn: boolean, name?: string) => {
+          setIsLoggedIn(loggedIn);
+          if (loggedIn && name) setUserName(name);
+        }}
+      />
     </>
   );
 }

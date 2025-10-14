@@ -1,13 +1,13 @@
-// LoginSignup.tsx
 import React, { useEffect, useState } from "react";
 import { X, ArrowLeft } from "lucide-react";
 import google from "../../assets/icon/google.png";
-import facebook from "../../assets/icon/facebook1.png";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
+  setIsLoggedIn: (loggedIn: boolean, name?: string) => void;
 }
+
 
 const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
   const [isSignup, setIsSignup] = useState(false);
@@ -17,76 +17,255 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
 
-  // Signup flow — send OTP
-  const handleSignup = (signupEmail: string) => {
-    if (!signupEmail) {
-      setOtpMsg("❌ Please enter your email.");
-      return;
-    }
+  const [user, setUser] = useState<{ name?: string; email: string } | null>(
+    null
+  );
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    setGeneratedOTP(otp);
-    setOtpMsg(`OTP sent to ${signupEmail}: ${otp}`);
-    setEmail(signupEmail);
-    setShowOtpInput(true);
-  };
+  
+  const [googleIdToken, setGoogleIdToken] = useState("");
 
-  // OTP verification
-  const handleVerify = () => {
-    if (!otpInput) {
-      setOtpMsg("❌ Please enter OTP!");
-      return;
-    }
-
-    if (otpInput === generatedOTP?.toString()) {
-      setOtpMsg("✅ Account Verified!");
-      setOtpInput("");
-      setGeneratedOTP(null);
-      setShowOtpInput(false);
-    } else {
-      setOtpMsg("❌ Invalid OTP, try again!");
-    }
-  };
-
-  // Google OAuth callback
-  const handleGoogleResponse = async (response: any) => {
-    const token = response.credential;
-    console.log("Google Token:", token);
-
-    // Simulate OTP flow after Google login
-    const fakeEmail = "googleuser@example.com"; // Replace with backend email
-    setOtpMsg(`OTP sent to ${fakeEmail}`);
-    setEmail(fakeEmail);
-    setShowOtpInput(true);
-  };
-
-  // Initialize Google button only in Signup
+  // Load user from localStorage on mount or when modal opens
   useEffect(() => {
-    if (!isSignup) return;
+    if (isOpen) {
+      const stored = localStorage.getItem("loggedInUser");
+      if (stored) setUser(JSON.parse(stored));
+    }
+  }, [isOpen]);
 
-    const timeout = setTimeout(() => {
-      if (window.google) {
+  // Save user
+  useEffect(() => {
+    if (user) localStorage.setItem("loggedInUser", JSON.stringify(user));
+  }, [user]);
+
+  // Google login
+  useEffect(() => {
+    if (!isOpen || !window.google) return;
+
+    const initializeGoogle = () => {
+      try {
         window.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           callback: handleGoogleResponse,
         });
 
-        window.google.accounts.id.renderButton(
-          document.getElementById("googleSignInDiv"),
-          { theme: "outline", size: "small",type:"icon" }
-        );
+        const loginBtn = document.getElementById("googleLoginBtn");
+        const signupBtn = document.getElementById("googleSignupBtn");
+
+        if (loginBtn) {
+          loginBtn.innerHTML = "";
+          window.google.accounts.id.renderButton(loginBtn, {
+            theme: "outline",
+            size: "large",
+            width: 250,
+          });
+        }
+
+        if (signupBtn) {
+          signupBtn.innerHTML = "";
+          window.google.accounts.id.renderButton(signupBtn, {
+            theme: "outline",
+            size: "large",
+            width: 250,
+          });
+        }
+      } catch (err) {
+        console.error("Google button error:", err);
       }
-    }, 500);
+    };
 
-    return () => clearTimeout(timeout);
-  }, [isSignup]);
+    initializeGoogle();
+  }, [isOpen]);
 
-  if (!isOpen) return null;
+  const handleSignup = async (signupEmail: string) => {
+    if (!signupEmail || !email) {
+      setOtpMsg("❌ Please enter your email.");
+      return;
+    }
+
+    const usernameInput = (
+      document.querySelector('input[placeholder="User Name"]') as HTMLInputElement
+    )?.value;
+    const passwordInput = (
+      document.querySelector('input[placeholder="Enter Your Password"]') as HTMLInputElement
+    )?.value;
+
+    if (!usernameInput || !passwordInput) {
+      setOtpMsg("❌ Please fill out all fields.");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:3000/auth/user/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: signupEmail,
+          username: usernameInput,
+          password: passwordInput,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Registration failed");
+
+      alert("📩 OTP sent to your email! Please check and enter it below.");
+      setOtpMsg("Enter the OTP sent to your email.");
+      setShowOtpInput(true);
+      setGeneratedOTP(null);
+    } catch (err: any) {
+      setOtpMsg(`❌ ${err.message}`);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!otpInput) {
+      alert("❌ Please enter OTP!");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:3000/auth/user/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: otpInput }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "OTP verification failed");
+
+      alert("✅ OTP Verified Successfully! You can now log in.");
+      setOtpMsg("");
+      setOtpInput("");
+      setShowOtpInput(false);
+      setIsSignup(false);
+    } catch (error: any) {
+      alert(`❌ ${error.message}`);
+    }
+  };
+
+const handleGoogleResponse = async (response: any) => {
+  const token = response.credential;
+  try {
+    const res = await fetch("http://localhost:3000/auth/user/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken: token }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Login failed");
+
+    const userData = {
+      id: data.user.id,         // add this
+      email: data.user.email,
+      name: data.user.name || "",
+      token: data.token,
+    };
+
+    setUser(userData);
+    localStorage.setItem("loggedInUser", JSON.stringify(userData));
+    setIsLoggedIn(true, userData.name);
+    setOtpMsg("✅ Google login successful!");
+    onClose();
+  } catch (err: any) {
+    setOtpMsg(`❌ ${err.message}`);
+  }
+};
+
+
+
+  const handleVerifyOtpForGoogle = async () => {
+    if (!otpInput) {
+      setOtpMsg("❌ Please enter OTP!");
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:3000/auth/user/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: otpInput }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "OTP verification failed");
+
+      const userData = {
+        email,
+        name: "",
+      };
+      setUser(userData);
+      localStorage.setItem("loggedInUser", JSON.stringify(userData));
+
+      setOtpMsg("✅ Google Account Verified!");
+      setOtpInput("");
+      setShowOtpInput(false);
+      onClose();
+    } catch (error: any) {
+      setOtpMsg(`❌ ${error.message}`);
+    }
+  };
+
+const handleLogin = async () => {
+  const emailInput = (
+    document.querySelector('input[placeholder="Enter Your Email"]') as HTMLInputElement
+  )?.value;
+  const passwordInput = (
+    document.querySelector('input[placeholder="Password"]') as HTMLInputElement
+  )?.value;
+
+  if (!emailInput || !passwordInput) {
+    setOtpMsg("❌ Please enter both email and password.");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:3000/auth/user/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: emailInput,
+        password: passwordInput,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Login failed");
+
+    // ✅ Include user ID here
+    const userData = {
+      id: data.id,        // Add this
+      email: data.email,
+      name: data.username || "",
+      role: data.role,
+      token: data.token,
+    };
+
+    localStorage.setItem("loggedInUser", JSON.stringify(userData));
+    setUser(userData);
+
+    setOtpMsg("✅ Login successful!");
+    setIsLoggedIn(true, userData.name); 
+    onClose();
+  } catch (error: any) {
+    setOtpMsg(`❌ ${error.message}`);
+  }
+};
+
+
+
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("loggedInUser");
+    setIsLoggedIn(false);
+  };
+
+if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="w-[600px] min-h-[500px] max-h-[90vh] bg-white rounded-xl relative shadow-lg flex overflow-hidden">
-
+      <div className="w-[600px] min-h-[500px] max-h-[90vh] bg-white rounded-xl relative shadow-lg flex overflow-hidden flex-col">
         {/* Close Button */}
         <button
           className="absolute top-3 right-3 bg-gray-200 hover:bg-gray-300 rounded-full p-1 z-20"
@@ -97,19 +276,28 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
             setOtpInput("");
             setOtpMsg("");
             setShowOtpInput(false);
+            setGoogleIdToken("");
+            setEmail("");
+            // Do NOT clear user or localStorage here
           }}
         >
           <X size={20} />
         </button>
 
-        {/* Banner */}
+        {/* Greeting */}
+        {/* {user && (
+          <div className="absolute top-3 left-4 text-lg font-semibold text-cyan-700 z-20">
+            Hello {user.name || user.email.split("@")[0]}!
+          </div>
+        )} */}
+
+        {/* Banner Image */}
         <div
-          className={`absolute right-0 top-0 w-1/2 h-full transition-transform duration-500 z-10 ${
-            isSignup ? "-translate-x-full" : "translate-x-0"
-          }`}
+          className={`absolute right-0 top-0 w-1/2 h-full transition-transform duration-500 z-10 ${isSignup ? "-translate-x-full" : "translate-x-0"
+            }`}
         >
           <img
-            src="https://img.freepik.com/free-vector/abstract-flat-design-background_23-2148450082.jpg"
+            src="src\assets\icon\intro1.jpeg"
             alt="banner"
             className="w-full h-full object-cover"
           />
@@ -117,9 +305,8 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
 
         {/* Login Form */}
         <div
-          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${
-            isSignup ? "-translate-x-full" : "translate-x-0"
-          }`}
+          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${isSignup ? "-translate-x-full" : "translate-x-0"
+            }`}
         >
           <h1 className="text-xl font-semibold">Log In</h1>
           <p className="text-xs text-gray-600">
@@ -141,13 +328,19 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
             <a href="#" className="text-xs text-cyan-700">
               Forgot Password?
             </a>
-            <button className="bg-cyan-700 text-white rounded-md px-4 py-1">
-              Next
+            <button
+              className="bg-cyan-700 text-white rounded-md px-4 py-1"
+              onClick={handleLogin}
+            >
+              Login
             </button>
-          </div>
-          <div className="flex gap-3 mt-3 justify-center"> <button className="flex items-center justify-center w-12 h-12 border border-gray-300 rounded-full transition duration-200 transform-gpu hover:scale-105 active:scale-95 hover:bg-blue-100 hover:shadow-md"> <img src={facebook} alt="Facebook" className="w-8 h-8" /> </button> <button className="flex items-center justify-center w-12 h-12 border border-gray-300 rounded-full transition duration-200 transform-gpu hover:scale-105 active:scale-95 hover:bg-red-100 hover:shadow-md"> <img src={google} alt="Google" className="w-8 h-8" /> </button> </div>
 
-          <span className="text-xs mt-2">
+          </div>
+
+          {/* Google Login Button */}
+          <div className="flex justify-center mt-6" id="googleLoginBtn"></div>
+
+          <span className="text-xs mt-4">
             Don't have an account yet?{" "}
             <span
               className="text-cyan-700 cursor-pointer hover:underline"
@@ -160,9 +353,8 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
 
         {/* Signup Form */}
         <div
-          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${
-            isSignup ? "translate-x-full" : "translate-x-[200%]"
-          }`}
+          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${isSignup ? "translate-x-full" : "translate-x-[200%]"
+            }`}
         >
           <button
             className="absolute top-3 left-3 bg-gray-200 hover:bg-gray-300 rounded-full p-1 z-20"
@@ -172,6 +364,9 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
               setOtpInput("");
               setOtpMsg("");
               setShowOtpInput(false);
+              setGoogleIdToken("");
+              setEmail("");
+              // Do NOT clear user or localStorage here
             }}
           >
             <ArrowLeft size={20} />
@@ -200,15 +395,12 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
           {!generatedOTP && !showOtpInput && (
             <button
               className="bg-cyan-700 text-white rounded-md px-4 py-1"
-              onClick={() =>
-                handleSignup(
-                  (document.getElementById("signup-email") as HTMLInputElement)
-                    ?.value
-                )
-              }
+              onClick={() => handleSignup(email)}
             >
-              Next
+              Register
             </button>
+
+
           )}
 
           {showOtpInput && (
@@ -223,16 +415,26 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
               <div className="text-xs mt-1 text-cyan-700">{otpMsg}</div>
               <button
                 className="bg-cyan-700 text-white rounded-md px-4 py-1 mt-1"
-                onClick={handleVerify}
+                onClick={generatedOTP ? handleVerify : handleVerifyOtpForGoogle}
               >
                 Verify OTP
               </button>
             </div>
           )}
 
-          {/* Google OAuth Button */}
+          {/* Google Signup Button */}
           {!showOtpInput && (
-            <div className="flex justify-center mt-3" id="googleSignInDiv"></div>
+            <div className="flex justify-center mt-3" id="googleSignupBtn"></div>
+          )}
+
+          {/* Google Verified Message */}
+          {/* Google Verified Message */}
+          {user && isSignup && (
+            <div className="mt-4 p-3 border border-green-400 bg-green-50 rounded text-sm text-green-800">
+              ✅ Logged in as <strong>{user.email}</strong>
+              <br />
+              Email Verified: Yes
+            </div>
           )}
 
           <span className="text-xs mt-2">
@@ -244,6 +446,17 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
               Login here
             </span>
           </span>
+
+          {/* New Logout Button (does NOT clear user/localStorage) */}
+          {user && (
+            <button
+              className="mt-6 bg-red-600 text-white rounded-md px-4 py-1"
+              onClick={handleLogout}
+              type="button"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -251,3 +464,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
 };
 
 export default LoginSignup;
+function setIsLoggedIn(arg0: boolean, name: any) {
+  throw new Error("Function not implemented.");
+}
+

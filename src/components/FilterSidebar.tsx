@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Filter } from 'lucide-react';
-import { categories, colors, brands } from './data/products';
 
 interface FilterState {
   category: string;
@@ -17,9 +16,20 @@ interface FilterSidebarProps {
   onClose: () => void;
   filters: FilterState;
   onFilterChange: (filters: FilterState) => void;
+  categories: string[];
+  brands: string[];
+  colors: string[];
 }
 
-export function FilterSidebar({ isOpen, onClose, filters, onFilterChange }: FilterSidebarProps) {
+export function FilterSidebar({ 
+  isOpen, 
+  onClose, 
+  filters, 
+  onFilterChange, 
+  categories, 
+  brands, 
+  colors 
+}: FilterSidebarProps) {
   const handleFilterChange = (key: keyof FilterState, value: string | number) => {
     onFilterChange({ ...filters, [key]: value });
   };

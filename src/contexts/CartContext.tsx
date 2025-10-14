@@ -1,191 +1,164 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
 export interface CartItem {
-  id: string
-  name: string
-  price: number
-  image_url: string
-  quantity: number
-  size?: string
-  color?: string
+  variant_name: any;
+  id: string;
+  product_id: string;
+  product_variant_id?: string | null;
+  name: string;
+  image_url: string;
+  price: number;
+  quantity: number;
+  color?: string;
+  size?: string;
 }
 
-interface CartState {
-  items: CartItem[]
-  total: number
-  itemCount: number
-  isOpen: boolean
+interface CartContextProps {
+  cartItems: CartItem[];
+  isCartOpen: boolean;
+  openCartDrawer: () => void;
+  closeCartDrawer: () => void;
+  addItem: (item: CartItem) => void;
+  updateCartItem: (item: CartItem, quantity: number) => void;
+  removeItem: (id: string) => void;
+  clearCart: () => void;
+  totalAmount: number;
+  totalQuantity: number;
 }
 
-type CartAction =
-  | { type: 'ADD_ITEM'; payload: Omit<CartItem, 'quantity'> }
-  | { type: 'REMOVE_ITEM'; payload: string }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
-  | { type: 'CLEAR_CART' }
-  | { type: 'TOGGLE_CART' }
-  | { type: 'OPEN_CART' }
-  | { type: 'CLOSE_CART' }
-  | { type: 'LOAD_CART'; payload: CartItem[] }
+const CartContext = createContext<CartContextProps>({} as CartContextProps);
+export const useCart = () => useContext(CartContext);
 
-const initialState: CartState = {
-  items: [],
-  total: 0,
-  itemCount: 0,
-  isOpen: false,
-}
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-function cartReducer(state: CartState, action: CartAction): CartState {
-  switch (action.type) {
-    case 'ADD_ITEM': {
-      const existingItem = state.items.find(item => 
-        item.id === action.payload.id && 
-        item.size === action.payload.size && 
-        item.color === action.payload.color
-      )
+  // ✅ Get logged in user from localStorage
+  const user = JSON.parse(localStorage.getItem("loggedInUser") || "{}");
 
-      let newItems: CartItem[]
-      if (existingItem) {
-        newItems = state.items.map(item =>
-          item.id === existingItem.id && 
-          item.size === existingItem.size && 
-          item.color === existingItem.color
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        )
-      } else {
-        newItems = [...state.items, { ...action.payload, quantity: 1 }]
-      }
+  /** ---------------------------
+   * Fetch Cart from Backend
+   ---------------------------- */
+  const fetchCart = async () => {
+    if (!user?.id) return;
 
-      const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      const itemCount = newItems.reduce((sum, item) => sum + item.quantity, 0)
-
-      return { ...state, items: newItems, total, itemCount }
+    try {
+      const { data } = await axios.get("http://localhost:3000/cart", {
+        params: { user_id: user.id },
+      });
+      setCartItems(data.cart_items || []);
+    } catch (err) {
+      console.error("Error fetching cart:", err);
     }
+  };
 
-    case 'REMOVE_ITEM': {
-      const newItems = state.items.filter(item => item.id !== action.payload)
-      const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      const itemCount = newItems.reduce((sum, item) => sum + item.quantity, 0)
-
-      return { ...state, items: newItems, total, itemCount }
-    }
-
-    case 'UPDATE_QUANTITY': {
-      const newItems = state.items.map(item =>
-        item.id === action.payload.id
-          ? { ...item, quantity: Math.max(0, action.payload.quantity) }
-          : item
-      ).filter(item => item.quantity > 0)
-
-      const total = newItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      const itemCount = newItems.reduce((sum, item) => sum + item.quantity, 0)
-
-      return { ...state, items: newItems, total, itemCount }
-    }
-
-    case 'CLEAR_CART':
-      return { ...state, items: [], total: 0, itemCount: 0 }
-
-    case 'TOGGLE_CART':
-      return { ...state, isOpen: !state.isOpen }
-
-    case 'OPEN_CART':
-      return { ...state, isOpen: true }
-
-    case 'CLOSE_CART':
-      return { ...state, isOpen: false }
-
-    case 'LOAD_CART': {
-      const total = action.payload.reduce((sum, item) => sum + item.price * item.quantity, 0)
-      const itemCount = action.payload.reduce((sum, item) => sum + item.quantity, 0)
-      return { ...state, items: action.payload, total, itemCount }
-    }
-
-    default:
-      return state
-  }
-}
-
-interface CartContextType {
-  state: CartState
-  addItem: (item: Omit<CartItem, 'quantity'>) => void
-  removeItem: (id: string) => void
-  updateQuantity: (id: string, quantity: number) => void
-  clearCart: () => void
-  toggleCart: () => void
-  openCart: () => void
-  closeCart: () => void
-}
-
-const CartContext = createContext<CartContextType | undefined>(undefined)
-
-export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(cartReducer, initialState)
-
-  // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart')
-    if (savedCart) {
-      try {
-        const cartItems = JSON.parse(savedCart)
-        dispatch({ type: 'LOAD_CART', payload: cartItems })
-      } catch (error) {
-        console.error('Error loading cart from localStorage:', error)
-      }
+    if (user?.id) fetchCart();
+  }, []);
+
+  /** ---------------------------
+   * Add Item to Cart
+   ---------------------------- */
+const addItem = async (newItem: CartItem) => {
+  try {
+    const payload = { ...newItem, user_id: user.id };
+    const { data } = await axios.post("http://localhost:3000/cart", payload);
+    setCartItems(data.cart_items || []);  // ✅ updates state from backend response
+    openCartDrawer();
+  } catch(err: any) {
+      console.error("Error adding to cart:", err.response?.data || err.message);
     }
-  }, [])
+  };
 
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state.items))
-  }, [state.items])
+  /** ---------------------------
+   * Update Cart Item Quantity
+   ---------------------------- */
+  const updateCartItem = async (item: CartItem, newQuantity: number) => {
+    if (newQuantity < 1) return;
 
-  const addItem = (item: Omit<CartItem, 'quantity'>) => {
-    dispatch({ type: 'ADD_ITEM', payload: item })
-  }
+    try {
+      const payload = {
+        quantity: newQuantity,
+        product_variant_id: item.product_variant_id,
+        user_id: user.id,
+        color: item.color,
+        size: item.size,
+        price: item.price,
+        name: item.name,
+        image_url: item.image_url,
+      };
 
-  const removeItem = (id: string) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: id })
-  }
+      const { data } = await axios.patch(
+        `http://localhost:3000/cart/${item.id}`,
+        payload
+      );
 
-  const updateQuantity = (id: string, quantity: number) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } })
-  }
+      setCartItems((prev) =>
+        prev.map((i) => (i.id === item.id ? { ...i, quantity: newQuantity } : i))
+      );
+    } catch (err: any) {
+      console.error("Error updating cart item:", err.response?.data || err.message);
+    }
+  };
 
-  const clearCart = () => {
-    dispatch({ type: 'CLEAR_CART' })
-  }
+  /** ---------------------------
+   * Remove Item from Cart
+   ---------------------------- */
+  const removeItem = async (id: string) => {
+    try {
+      await axios.delete(`http://localhost:3000/cart/${id}`, {
+        params: { user_id: user.id },
+      });
+      setCartItems((prev) => prev.filter((i) => i.id !== id));
+    } catch (err: any) {
+      console.error("Error removing cart item:", err.response?.data || err.message);
+    }
+  };
 
-  const toggleCart = () => {
-    dispatch({ type: 'TOGGLE_CART' })
-  }
+  /** ---------------------------
+   * Clear Cart
+   ---------------------------- */
+  const clearCart = async () => {
+    try {
+      await axios.delete(`http://localhost:3000/cart/clear/${user.id}`);
+      setCartItems([]);
+    } catch (err: any) {
+      console.error("Error clearing cart:", err.response?.data || err.message);
+    }
+  };
 
-  const openCart = () => {
-    dispatch({ type: 'OPEN_CART' })
-  }
+  /** ---------------------------
+   * Drawer Controls
+   ---------------------------- */
+  const openCartDrawer = () => setIsCartOpen(true);
+  const closeCartDrawer = () => setIsCartOpen(false);
 
-  const closeCart = () => {
-    dispatch({ type: 'CLOSE_CART' })
-  }
+  /** ---------------------------
+   * Totals
+   ---------------------------- */
+  const totalAmount = cartItems.reduce(
+    (sum, i) => sum + i.price * i.quantity,
+    0
+  );
+  const totalQuantity = cartItems.reduce((sum, i) => sum + i.quantity, 0);
 
-  const value = {
-    state,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    toggleCart,
-    openCart,
-    closeCart,
-  }
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
-}
-
-export function useCart() {
-  const context = useContext(CartContext)
-  if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider')
-  }
-  return context
-}
+  return (
+    <CartContext.Provider
+      value={{
+        cartItems,
+        isCartOpen,
+        openCartDrawer,
+        closeCartDrawer,
+        addItem,
+        updateCartItem,
+        removeItem,
+        clearCart,
+        totalAmount,
+        totalQuantity,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+};
