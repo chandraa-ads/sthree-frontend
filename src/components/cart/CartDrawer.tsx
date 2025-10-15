@@ -2,12 +2,12 @@ import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { useCart } from "../../contexts/CartContext";
-
+import { useNavigate } from "react-router-dom";
 export const CartDrawer: React.FC = () => {
   const { cartItems, isCartOpen, closeCartDrawer, updateCartItem, removeItem } = useCart();
 
   const totalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-
+  const navigate = useNavigate();
   return (
     <AnimatePresence>
       {isCartOpen && (
@@ -113,9 +113,14 @@ export const CartDrawer: React.FC = () => {
               <button
                 className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
                 disabled={!cartItems.length}
+                onClick={() => {
+                  closeCartDrawer(); // Optional: close the drawer
+                  navigate("/cart"); // Navigate to cart page
+                }}
               >
                 Checkout
               </button>
+
             </div>
           </motion.div>
         </>

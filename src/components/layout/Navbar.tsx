@@ -205,14 +205,15 @@ export default function Navbar() {
       </nav>
 
       {/* Login/Signup Modal */}
-      <LoginSignup
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        setIsLoggedIn={(loggedIn: boolean, name?: string) => {
-          setIsLoggedIn(loggedIn);
-          if (loggedIn && name) setUserName(name);
-        }}
-      />
+     <LoginSignup
+  isOpen={isLoginOpen}
+  onClose={() => setIsLoginOpen(false)}
+  setIsLoggedIn={(loggedIn: boolean, name?: string) => {
+    setIsLoggedIn(loggedIn);
+    if (loggedIn && name) setUserName(name);
+  }}
+/>
+
     </>
   );
 }

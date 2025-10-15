@@ -9,19 +9,22 @@ interface Props {
 }
 
 
-const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
+const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
+
   const [isSignup, setIsSignup] = useState(false);
   const [generatedOTP, setGeneratedOTP] = useState<number | null>(null);
   const [otpInput, setOtpInput] = useState("");
   const [otpMsg, setOtpMsg] = useState("");
   const [email, setEmail] = useState("");
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
 
   const [user, setUser] = useState<{ name?: string; email: string } | null>(
     null
   );
 
-  
+
   const [googleIdToken, setGoogleIdToken] = useState("");
 
   // Load user from localStorage on mount or when modal opens
@@ -39,11 +42,13 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
 
   // Google login
   useEffect(() => {
-    if (!isOpen || !window.google) return;
+    if (!isOpen || !(window as any).google) return;
 
     const initializeGoogle = () => {
       try {
-        window.google.accounts.id.initialize({
+        const win: any = window;
+
+        win.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           callback: handleGoogleResponse,
         });
@@ -53,7 +58,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
 
         if (loginBtn) {
           loginBtn.innerHTML = "";
-          window.google.accounts.id.renderButton(loginBtn, {
+          win.google.accounts.id.renderButton(loginBtn, {
             theme: "outline",
             size: "large",
             width: 250,
@@ -62,7 +67,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
 
         if (signupBtn) {
           signupBtn.innerHTML = "";
-          window.google.accounts.id.renderButton(signupBtn, {
+          win.google.accounts.id.renderButton(signupBtn, {
             theme: "outline",
             size: "large",
             width: 250,
@@ -76,8 +81,8 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
     initializeGoogle();
   }, [isOpen]);
 
-  const handleSignup = async (signupEmail: string) => {
-    if (!signupEmail || !email) {
+  const handleSignup = async () => {
+    if (!email) {
       setOtpMsg("❌ Please enter your email.");
       return;
     }
@@ -99,11 +104,17 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: signupEmail,
+          email: email,
           username: usernameInput,
           password: passwordInput,
         }),
       });
+
+
+      if (res.status === 409) {
+        setOtpMsg("❌ Email already registered. Try logging in.");
+        return;
+      }
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Registration failed");
@@ -117,9 +128,10 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
     }
   };
 
+
   const handleVerify = async () => {
-    if (!otpInput) {
-      alert("❌ Please enter OTP!");
+    if (!otpInput || !email) {
+      setOtpMsg("❌ Please enter OTP!");
       return;
     }
 
@@ -133,44 +145,55 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "OTP verification failed");
 
-      alert("✅ OTP Verified Successfully! You can now log in.");
-      setOtpMsg("");
+      // OTP verified successfully
+      alert("✅ Registration successful! Please log in."); // show alert instead of inline message
+
+      // Clear OTP fields
       setOtpInput("");
       setShowOtpInput(false);
+      setGeneratedOTP(null);
+
+      // Switch back to login form
       setIsSignup(false);
-    } catch (error: any) {
-      alert(`❌ ${error.message}`);
+
+      // Optionally clear email input
+      setEmail("");
+
+    } catch (err: any) {
+      setOtpMsg(`❌ ${err.message}`);
     }
   };
 
-const handleGoogleResponse = async (response: any) => {
-  const token = response.credential;
-  try {
-    const res = await fetch("http://localhost:3000/auth/user/google", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken: token }),
-    });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Login failed");
+  const handleGoogleResponse = async (response: any) => {
+    const token = response.credential;
+    try {
+      const res = await fetch("http://localhost:3000/auth/user/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: token }),
+      });
 
-    const userData = {
-      id: data.user.id,         // add this
-      email: data.user.email,
-      name: data.user.name || "",
-      token: data.token,
-    };
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Login failed");
 
-    setUser(userData);
-    localStorage.setItem("loggedInUser", JSON.stringify(userData));
-    setIsLoggedIn(true, userData.name);
-    setOtpMsg("✅ Google login successful!");
-    onClose();
-  } catch (err: any) {
-    setOtpMsg(`❌ ${err.message}`);
-  }
-};
+      const userData = {
+        id: data.user.id,         // add this
+        email: data.user.email,
+        name: data.user.name || "",
+        token: data.token,
+      };
+
+      setUser(userData);
+      localStorage.setItem("loggedInUser", JSON.stringify(userData));
+      setSuccessMsg("✅ Login successful!");
+      setIsLoggedIn(true, userData.name);
+      setOtpMsg("✅ Google login successful!");
+      onClose();
+    } catch (err: any) {
+      setOtpMsg(`❌ ${err.message}`);
+    }
+  };
 
 
 
@@ -206,51 +229,46 @@ const handleGoogleResponse = async (response: any) => {
     }
   };
 
-const handleLogin = async () => {
-  const emailInput = (
-    document.querySelector('input[placeholder="Enter Your Email"]') as HTMLInputElement
-  )?.value;
-  const passwordInput = (
-    document.querySelector('input[placeholder="Password"]') as HTMLInputElement
-  )?.value;
+  const handleLogin = async () => {
+    const emailInput = (document.querySelector('input[placeholder="Enter Your Email"]') as HTMLInputElement)?.value;
+    const passwordInput = (document.querySelector('input[placeholder="Password"]') as HTMLInputElement)?.value;
 
-  if (!emailInput || !passwordInput) {
-    setOtpMsg("❌ Please enter both email and password.");
-    return;
-  }
+    if (!emailInput || !passwordInput) {
+      setOtpMsg("❌ Please enter both email and password.");
+      return;
+    }
 
-  try {
-    const res = await fetch("http://localhost:3000/auth/user/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: emailInput,
-        password: passwordInput,
-      }),
-    });
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3000/auth/user/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailInput, password: passwordInput }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Login failed");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Login failed");
 
-    // ✅ Include user ID here
-    const userData = {
-      id: data.id,        // Add this
-      email: data.email,
-      name: data.username || "",
-      role: data.role,
-      token: data.token,
-    };
+      const userData = {
+        id: data.id,
+        email: data.email,
+        name: data.username || "",
+        role: data.role,
+        token: data.token,
+      };
 
-    localStorage.setItem("loggedInUser", JSON.stringify(userData));
-    setUser(userData);
+      localStorage.setItem("loggedInUser", JSON.stringify(userData));
+      setUser(userData);
+      setOtpMsg("✅ Login successful!");
+      setIsLoggedIn(true, userData.name);
+      onClose();
+    } catch (error: any) {
+      setOtpMsg(`❌ ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    setOtpMsg("✅ Login successful!");
-    setIsLoggedIn(true, userData.name); 
-    onClose();
-  } catch (error: any) {
-    setOtpMsg(`❌ ${error.message}`);
-  }
-};
 
 
 
@@ -261,7 +279,8 @@ const handleLogin = async () => {
     setIsLoggedIn(false);
   };
 
-if (!isOpen) return null;
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -274,6 +293,7 @@ if (!isOpen) return null;
             setIsSignup(false);
             setGeneratedOTP(null);
             setOtpInput("");
+            setSuccessMsg("✅ Login successful!");
             setOtpMsg("");
             setShowOtpInput(false);
             setGoogleIdToken("");
@@ -331,9 +351,15 @@ if (!isOpen) return null;
             <button
               className="bg-cyan-700 text-white rounded-md px-4 py-1"
               onClick={handleLogin}
+              disabled={loading}
             >
-              Login
+              {loading ? (
+                <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+              ) : (
+                "Login"
+              )}
             </button>
+
 
           </div>
 
@@ -362,6 +388,7 @@ if (!isOpen) return null;
               setIsSignup(false);
               setGeneratedOTP(null);
               setOtpInput("");
+              setSuccessMsg("✅ Login successful!");
               setOtpMsg("");
               setShowOtpInput(false);
               setGoogleIdToken("");
@@ -431,11 +458,10 @@ if (!isOpen) return null;
           {/* Google Verified Message */}
           {user && isSignup && (
             <div className="mt-4 p-3 border border-green-400 bg-green-50 rounded text-sm text-green-800">
-              ✅ Logged in as <strong>{user.email}</strong>
-              <br />
-              Email Verified: Yes
+              ✅ Email verified! Please go to the login page.
             </div>
           )}
+
 
           <span className="text-xs mt-2">
             Already have an account?{" "}
