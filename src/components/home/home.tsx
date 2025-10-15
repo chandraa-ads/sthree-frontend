@@ -158,7 +158,7 @@ export function Home() {
             categories={categories}
             brands={brands}
             colors={colors}
-            className="flex-shrink-0 lg:sticky lg:top-[120px] lg:h-[calc(100vh-120px)]"
+            // className="flex-shrink-0 lg:sticky lg:top-[120px] lg:h-[calc(100vh-120px)]"
           />
 
           {/* Main Content */}

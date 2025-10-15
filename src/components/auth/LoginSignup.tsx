@@ -81,7 +81,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
     initializeGoogle();
   }, [isOpen]);
 
-  const handleSignup = async () => {
+  const handleSignup = async (email: string) => {
     if (!email) {
       setOtpMsg("❌ Please enter your email.");
       return;
