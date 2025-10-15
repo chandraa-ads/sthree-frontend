@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
-import { Footer } from "./components/footer/FooterUser";
-import { Home } from "./components/home/Home";
-import Navbar from "./components/layout/Navbar";
-import { ProductDetail } from "./components/admin/ProductDetails";
-import { CartProvider } from "./contexts/CartContext";
+import { Home } from "./components/home/Home"; // folder: home, file: Home.tsx
+import Navbar from "./components/layout/Navbar"; // folder: layout, file: Navbar.tsx
+import { ProductDetail } from "./components/admin/ProductDetails"; // ProductDetails.tsx
+import { CartDrawer } from "./components/cart/CartDrawer"; // CartDrawer.tsx
+import LoginSignup from "./components/auth/LoginSignup"; // LoginSignup.tsx
+import AccountInfo from "./payment/AccountInfo"; // AccountInfo.tsx
+import UserProfile from "./components/home/UserProfile"; // UserProfile.tsx
+import AdminLogin from "./components/admin/AdminLogin"; // AdminLogin.tsx
+import ProductForm from "./components/products/ProductForm"; // ProductForm.tsx
+import CategoryPage from "./components/home/CategoryPage"; // CategoryPage.tsx
+import { WishlistPage } from "./components/WishlistPage"; // WishlistPage.tsx
+import ShoppingCart from "./components/cart/ShoppingCart"; // ShoppingCart.tsx
+import { Footer } from "./components/footer/FooterUser"; // FooterUser.tsx
 import { AuthProvider } from "./contexts/AuthContext";
-import { CartDrawer } from "./components/cart/CartDrawer"; // ✅ FIXED LINE
-import AccountInfo from "./payment/AccountInfo";
-import LoginSignup from "./components/auth/LoginSignup";
-import UserProfile from "./components/home/UserProfile";
-import AdminLogin from "./components/admin/AdminLogin";
-import ProductForm from "./components/products/ProductForm";
-import CategoryPage from "./components/home/CategoryPage";
-import { WishlistPage } from "./components/WishlistPage";
-import ShoppingCart from "./components/cart/ShoppingCart";
+import { CartProvider } from "./contexts/CartContext";
+
 
 
 const Layout: React.FC<React.PropsWithChildren> = ({ children }) => (
