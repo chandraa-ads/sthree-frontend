@@ -9,9 +9,9 @@ import { FilterSidebar } from '../FilterSidebar';
 import { SortDropdown, SortOption } from '../SortDropdown';
 import { ProductCardSkeleton } from '../ui/ProductCardSkeleton';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
-import { Hero } from '../home/Hero';
-import { FeaturedProducts } from '../home/FeaturedProducts';
-import { Categories } from '../home/Categories';
+import { Hero } from './Hero';
+import { FeaturedProducts } from './FeaturedProducts';
+import { Categories } from './Categories';
 
 interface FilterState {
   category: string;
