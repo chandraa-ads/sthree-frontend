@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X, ArrowLeft } from "lucide-react";
 import google from "../../assets/icon/google.png";
+import introBanner from "../../assets/icon/intro1.jpeg";
 
 interface Props {
   isOpen: boolean;
@@ -316,11 +317,12 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
           className={`absolute right-0 top-0 w-1/2 h-full transition-transform duration-500 z-10 ${isSignup ? "-translate-x-full" : "translate-x-0"
             }`}
         >
-          <img
-            src="src\assets\icon\intro1.jpeg"
-            alt="banner"
-            className="w-full h-full object-cover"
-          />
+       <img
+  src={introBanner}
+  alt="banner"
+  className="w-full h-full object-cover"
+/>
+
         </div>
 
         {/* Login Form */}

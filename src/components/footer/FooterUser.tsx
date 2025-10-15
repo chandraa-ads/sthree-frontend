@@ -1,7 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, WebcamIcon } from "lucide-react";
+import SthLogo from "../../assets/icon/Sth_W.svg";
+import WebMedia6Logo from "../../assets/icon/web media 6.svg";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -36,7 +38,7 @@ export function Footer() {
           {/* Brand Section */}
           <div className="space-y-4">
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center">
-              <img src="../src/assets/icon/Sth_W.svg" alt="SthRee" className="h-10 w-auto" />
+              <img src={SthLogo} alt="SthRee" className="h-10 w-auto" />
               <span className="ml-2 text-xl font-bold transition-colors duration-300 hover:text-pink-600">
                 SthRee
               </span>
@@ -170,7 +172,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 hover:underline"
               >
-                <img src="src/assets/icon/web media 6.svg" alt="Web Media 6" className="h-6 w-auto" />
+                <img src={WebMedia6Logo} alt="Web Media 6" className="h-6 w-auto" />
                 <span className="text-gray-400 text-sm">Powered by Media Web 6</span>
               </a>
             </div>

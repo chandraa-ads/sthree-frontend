@@ -1,48 +1,25 @@
 import React from "react";
 import { motion } from "framer-motion";
+import silkSareeImg from "../../assets/landing_img/set topssalwar.jpg";
+import cottonSareeImg from "../../assets/landing_img/80f175fb3a268fc594148204ce134d8a.jpg";
+import designerSareeImg from "../../assets/landing_img/Blue Crepe Satin.jpg";
+import partyWear1 from "../../assets/landing_img/c67d2c0f89eb944d58fc9fef062ece06.jpg";
+import partyWear2 from "../../assets/landing_img/Chiffon Lace Border Work Saree.jpg";
+import partyWear3 from "../../assets/landing_img/kurtis sandal.jpg";
+import partyWear4 from "../../assets/landing_img/New pure chanderi batik saree with designer blouse..jpg";
+import partyWear5 from "../../assets/landing_img/Peach checked linen saree.jpg";
 
 const categories = [
-  {
-    id: 1,
-    name: "Silk Sarees",
-    image:
-"../src/assets/landing_img/set topssalwar.jpg",
-  },
-  {
-    id: 2,
-    name: "Cotton Sarees",
-    image:
-"../src/assets/landing_img/80f175fb3a268fc594148204ce134d8a.jpg",
-  },
-  {
-    id: 3,
-    name: "Designer Sarees",
-    image:
-"../src/assets/landing_img/Blue Crepe Satin.jpg",  },
-  {
-    id: 4,
-    name: "Party Wear",
-    image:
-"../src/assets/landing_img/c67d2c0f89eb944d58fc9fef062ece06.jpg", },
-    {
-    id: 5,
-    name: "Party Wear",
-    image:
-"../src/assets/landing_img/Chiffon Lace Border Work Saree.jpg",  },
-    {
-    id: 6,
-    name: "Party Wear",
-    image:
-"../src/assets/landing_img/kurtis sandal.jpg", },    {
-    id: 7,
-    name: "Party Wear",
-    image:
-"../src/assets/landing_img/New pure chanderi batik saree with designer blouse..jpg",  },    {
-    id: 8,
-    name: "Party Wear",
-    image:
-"../src/assets/landing_img/Peach checked linen saree.jpg",  },
+  { id: 1, name: "Silk Sarees", image: silkSareeImg },
+  { id: 2, name: "Cotton Sarees", image: cottonSareeImg },
+  { id: 3, name: "Designer Sarees", image: designerSareeImg },
+  { id: 4, name: "Party Wear", image: partyWear1 },
+  { id: 5, name: "Party Wear", image: partyWear2 },
+  { id: 6, name: "Party Wear", image: partyWear3 },
+  { id: 7, name: "Party Wear", image: partyWear4 },
+  { id: 8, name: "Party Wear", image: partyWear5 },
 ];
+
 
 export function Categories() {
   return (
