@@ -18,7 +18,9 @@ const ShoppingCart: React.FC = () => {
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* LEFT SIDE - CART ITEMS */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-md p-6">
-          <h1 className="text-2xl font-semibold mb-6 border-b pb-3">Shopping Cart</h1>
+          <h1 className="text-2xl font-semibold mb-6 border-b pb-3">
+            Shopping Cart
+          </h1>
 
           {cartItems.length === 0 ? (
             <div className="text-center py-16">
@@ -31,7 +33,7 @@ const ShoppingCart: React.FC = () => {
                   key={item.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col sm:flex-row sm:items-center gap-6 border-b pb-6"
+                  className="flex flex-col sm:flex-row sm:items-center gap-4 border-b pb-6"
                 >
                   {/* Product Image */}
                   <img
@@ -40,65 +42,79 @@ const ShoppingCart: React.FC = () => {
                     className="w-28 h-28 object-cover rounded-lg border"
                   />
 
-                  {/* Product Info */}
-                <div className="flex-1">
-  <h4 className="font-semibold text-lg">{item.name}</h4>
+                  {/* Product Info + Amount + Delete */}
+                  <div className="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Left side: Info and quantity */}
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-lg">{item.name}</h4>
 
-  {/* Trash button above price */}
-  <div className="flex justify-end mt-1">
-    <button
-      onClick={() => removeItem(item.id)}
-      className="text-red-500 hover:text-red-600 transition"
-      title="Remove item"
-    >
-      <Trash2 size={18} />
-    </button>
-  </div>
+                      {/* Variant details */}
+                      <div className="text-xs text-gray-500 mt-1 space-y-1">
+                        {item.size && (
+                          <p>
+                            <span className="font-medium text-gray-700">
+                              Size:
+                            </span>{" "}
+                            {item.size}
+                          </p>
+                        )}
+                        {item.color && (
+                          <p>
+                            <span className="font-medium text-gray-700">
+                              Color:
+                            </span>{" "}
+                            {item.color}
+                          </p>
+                        )}
+                        {item.variant_name && (
+                          <p>
+                            <span className="font-medium text-gray-700">
+                              Variant:
+                            </span>{" "}
+                            {item.variant_name}
+                          </p>
+                        )}
+                      </div>
 
-  <p className="text-gray-600 mt-1 text-sm">₹{item.price}</p>
+                      {/* Quantity Controls */}
+                      <div className="flex items-center mt-3">
+                        <button
+                          onClick={() =>
+                            updateCartItem(item, Math.max(item.quantity - 1, 1))
+                          }
+                          className="px-3 py-1 border rounded-l hover:bg-gray-100"
+                        >
+                          -
+                        </button>
+                        <span className="px-4 py-1 border-t border-b">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            updateCartItem(item, item.quantity + 1)
+                          }
+                          className="px-3 py-1 border rounded-r hover:bg-gray-100"
+                        >
+                          +
+                        </button>
+                        <button
+                        onClick={() => removeItem(item.id)}
+                        className="text-red-500 hover:text-red-600 transition ml-10"
+                        title="Remove item"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      </div>
+                    </div>
 
-  {/* Variant details */}
-  <div className="text-xs text-gray-500 mt-2 space-y-1">
-    {item.size && (
-      <p>
-        <span className="font-medium text-gray-700">Size:</span> {item.size}
-      </p>
-    )}
-    {item.color && (
-      <p>
-        <span className="font-medium text-gray-700">Color:</span> {item.color}
-      </p>
-    )}
-    {item.variant_name && (
-      <p>
-        <span className="font-medium text-gray-700">Variant:</span>{" "}
-        {item.variant_name}
-      </p>
-    )}
-  </div>
-
-  {/* Quantity Controls */}
-  <div className="flex items-center mt-3">
-    <button
-      onClick={() => updateCartItem(item, item.quantity - 1)}
-      className="px-3 py-1 border rounded-l hover:bg-gray-100"
-    >
-      -
-    </button>
-    <span className="px-4 py-1 border-t border-b">{item.quantity}</span>
-    <button
-      onClick={() => updateCartItem(item, item.quantity + 1)}
-      className="px-3 py-1 border rounded-r hover:bg-gray-100"
-    >
-      +
-    </button>
-  </div>
-</div>
-
-
-                  {/* Item total */}
-                  <div className="sm:w-32 text-right font-semibold text-gray-800">
-                    ₹{(Number(item.price) * item.quantity).toFixed(2)}
+                    {/* Right side: Amount + Delete */}
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-end gap-2 mt-2 sm:mt-0">
+                      
+                      
+                      <span className="font-semibold text-gray-800">
+                        ₹{(Number(item.price) * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -108,8 +124,10 @@ const ShoppingCart: React.FC = () => {
 
         {/* RIGHT SIDE - ORDER SUMMARY */}
         {cartItems.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-md p-6 h-fit sticky top-10">
-            <h2 className="text-xl font-semibold border-b pb-3 mb-4">Order Summary</h2>
+          <div className="bg-white rounded-2xl shadow-md p-6 h-fit lg:sticky lg:top-10">
+            <h2 className="text-xl font-semibold border-b pb-3 mb-4">
+              Order Summary
+            </h2>
 
             <div className="space-y-3 text-gray-700">
               <div className="flex justify-between">

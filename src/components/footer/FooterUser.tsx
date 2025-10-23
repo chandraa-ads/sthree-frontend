@@ -70,11 +70,15 @@ export function Footer() {
                 <li key={link.name}>
                   <motion.button
                     whileHover={{ x: 5 }}
-                    onClick={() => navigate(link.path)}
+                    onClick={() => {
+                      navigate(link.path);
+                      window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top smoothly
+                    }}
                     className="text-gray-400 hover:text-white transition-colors text-sm"
                   >
                     {link.name}
                   </motion.button>
+
                 </li>
               ))}
             </ul>

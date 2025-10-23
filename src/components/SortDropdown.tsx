@@ -24,7 +24,7 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
 
   return (
     <div className="relative">
-      <motion.button
+      {/* <motion.button
         whileHover={{ scale: 1.02 }}
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-pink-600 transition-colors"
@@ -38,7 +38,7 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
         >
           <ChevronDown className="w-4 h-4 text-gray-500" />
         </motion.div>
-      </motion.button>
+      </motion.button> */}
 
       <AnimatePresence>
         {isOpen && (

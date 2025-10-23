@@ -20,7 +20,6 @@ const categories = [
   { id: 8, name: "Party Wear", image: partyWear5 },
 ];
 
-
 export function Categories() {
   return (
     <section className="py-10 bg-white">
@@ -41,34 +40,28 @@ export function Categories() {
         {/* Infinite Marquee */}
         <div className="relative overflow-hidden">
           <motion.div
-            className="flex gap-6"
-            animate={{ x: ["0%", "-30%"] }}
+            className="flex gap-4 sm:gap-6"
+            animate={{ x: ["0%", "-100%"] }}
             transition={{
               repeat: Infinity,
-              duration: 10, // change speed
+              duration: 24, // ⚡ Increased speed (was 30)
               ease: "linear",
             }}
           >
-            {/* Duplicate cards so loop is seamless */}
             {[...categories, ...categories].map((category, index) => (
               <div
                 key={index}
-                className="relative min-w-[250px] h-[250px] flex-shrink-0 group cursor-pointer overflow-hidden rounded-2xl shadow-lg"
+                className="relative min-w-[200px] sm:min-w-[250px] h-[200px] sm:h-[250px] flex-shrink-0 group cursor-pointer overflow-hidden rounded-2xl shadow-lg"
               >
-                {/* Full Image */}
                 <img
                   src={category.image}
                   alt={category.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-
-                {/* Transparent Title Overlay */}
-                {/* <div className="absolute bottom-0 w-full bg-black/30 text-white text-center py-2 text-lg font-bold">
-                  {category.name}
-                </div> */}
               </div>
             ))}
           </motion.div>
+
         </div>
       </div>
     </section>

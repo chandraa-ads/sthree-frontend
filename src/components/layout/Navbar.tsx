@@ -33,6 +33,7 @@ export default function Navbar() {
     { name: "DUPATTA", icon: dupattaIcon },
     { name: "ACCESSORIES", icon: accessoriesIcon },
     { name: "MENS", icon: mens },
+    { name: "PROFILE", icon: User },
   ];
 
   // Check login status on mount
@@ -72,11 +73,23 @@ export default function Navbar() {
     }
   }, [location]);
 
-  const handleCategoryClick = (category: string) => {
+const handleCategoryClick = (category: string) => {
+  if (category === "PROFILE") {
+    if (isLoggedIn) {
+      navigate("/userprofile");
+    } else {
+      alert("🔒 Please log in to access your profile.");
+      setIsLoginOpen(true); // Optional: open login modal
+    }
+  } else {
     setSelectedCategory(category);
     navigate(`/category/${category.toLowerCase()}`);
-    setIsMenuOpen(false);
-  };
+  }
+
+  setIsMenuOpen(false);
+};
+
+
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
@@ -117,9 +130,8 @@ export default function Navbar() {
               </button>
             ) : (
               <div className="flex items-center space-x-3">
-                <span className="text-gray-700 font-medium">
-                  Hello, {userName || "User"}!
-                </span>
+               
+
                 <button
                   onClick={handleLogout}
                   className="bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
@@ -157,9 +169,8 @@ export default function Navbar() {
             <button
               key={cat.name}
               onClick={() => handleCategoryClick(cat.name)}
-              className={`flex items-center space-x-2 hover:text-green-600 focus:outline-none ${
-                selectedCategory === cat.name ? "text-green-600 font-bold" : ""
-              }`}
+              className={`flex items-center space-x-2 hover:text-green-600 focus:outline-none ${selectedCategory === cat.name ? "text-green-600 font-bold" : ""
+                }`}
             >
               <img src={cat.icon} alt={cat.name} className="w-6 h-6 object-contain" />
               <span>{cat.name}</span>
@@ -190,9 +201,8 @@ export default function Navbar() {
                   <button
                     key={cat.name}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className={`flex items-center space-x-2 text-gray-800 hover:text-green-600 focus:outline-none ${
-                      selectedCategory === cat.name ? "text-green-600 font-bold" : ""
-                    }`}
+                    className={`flex items-center space-x-2 text-gray-800 hover:text-green-600 focus:outline-none ${selectedCategory === cat.name ? "text-green-600 font-bold" : ""
+                      }`}
                   >
                     <img src={cat.icon} alt={cat.name} className="w-6 h-6 object-contain" />
                     <span>{cat.name}</span>
@@ -205,14 +215,14 @@ export default function Navbar() {
       </nav>
 
       {/* Login/Signup Modal */}
-     <LoginSignup
-  isOpen={isLoginOpen}
-  onClose={() => setIsLoginOpen(false)}
-  setIsLoggedIn={(loggedIn: boolean, name?: string) => {
-    setIsLoggedIn(loggedIn);
-    if (loggedIn && name) setUserName(name);
-  }}
-/>
+      <LoginSignup
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        setIsLoggedIn={(loggedIn: boolean, name?: string) => {
+          setIsLoggedIn(loggedIn);
+          if (loggedIn && name) setUserName(name);
+        }}
+      />
 
     </>
   );

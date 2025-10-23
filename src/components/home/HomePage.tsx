@@ -42,6 +42,18 @@ export function Home() {
     maxPrice: 25000,
     minRating: 0,
   });
+  const [isSearchVisible, setIsSearchVisible] = useState(true);
+
+  // Mobile filter toggle
+  const handleOpenFilters = () => {
+    setIsFilterOpen(true);
+    setIsSearchVisible(false); // hide search bar on mobile when filters open
+  };
+
+  const handleCloseFilters = () => {
+    setIsFilterOpen(false);
+    setIsSearchVisible(true); // show search bar again when filters close
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -152,50 +164,55 @@ export function Home() {
           {/* Filters Sidebar */}
           <FilterSidebar
             isOpen={isFilterOpen}
-            onClose={() => setIsFilterOpen(false)}
+            onClose={handleCloseFilters}
             filters={filters}
             onFilterChange={setFilters}
             categories={categories}
             brands={brands}
             colors={colors}
-            // className="flex-shrink-0 lg:sticky lg:top-[120px] lg:h-[calc(100vh-120px)]"
+          // className="flex-shrink-0 lg:sticky lg:top-[120px] lg:h-[calc(100vh-120px)]"
           />
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col">
             {/* Sticky Search & Sort */}
-            <div className="sticky top-[120px] z-50 bg-white/95 backdrop-blur-sm shadow px-0 sm:px-4 py-2">
-              <div className="flex flex-col sm:flex-row gap-2 mb-2 items-center">
-                {/* Sort Dropdown on Left */}
-                <div className="flex-shrink-0">
-                  <SortDropdown value={sortBy} onChange={setSortBy} />
+            {isSearchVisible && (
+              <div className="sticky top-24 lg:top-[120px] z-50 bg-white/95 backdrop-blur-sm shadow px-4 py-2">
+                <div className="flex flex-col sm:flex-row gap-2 mb-2 items-center">
+                  {/* Sort Dropdown */}
+                  <div className="flex-shrink-0">
+                    <SortDropdown value={sortBy} onChange={setSortBy} />
+                  </div>
+
+                  {/* Search Bar */}
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                    />
+                  </div>
+
+                  {/* Mobile Filter Button */}
+                  <button
+                    onClick={handleOpenFilters}
+                    className="lg:hidden flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-pink-600 transition-colors"
+                  >
+                    <Filter className="w-5 h-5" />
+                    <span>Filters</span>
+                  </button>
                 </div>
 
-                {/* Search Bar (flex-1 to take remaining space) */}
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    type="text"
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-                  />
-                </div>
-
-                {/* Mobile Filter Button */}
-                <button
-                  onClick={() => setIsFilterOpen(true)}
-                  className="lg:hidden flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-pink-600 transition-colors"
-                >
-                  <Filter className="w-5 h-5" />
-                  <span>Filters</span>
-                </button>
+                {/* Results Count */}
+                <p className="text-gray-600 mt-1">{filteredProducts.length} products found</p>
               </div>
+            )}
 
-              {/* Results Count (optional below search for clarity) */}
-              <p className="text-gray-600 mt-1">{filteredProducts.length} products found</p>
-            </div>
+
+
 
 
             {/* Products Grid (Scrollable) */}

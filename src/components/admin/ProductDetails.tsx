@@ -43,45 +43,45 @@ export function ProductDetail() {
   const [allRatings, setAllRatings] = useState<UserRating[]>([]);
   const [previewMedia, setPreviewMedia] = useState<{ url: string; type: "image" | "video" } | null>(null);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
-const [user, setUser] = useState<{ id: string; token: string } | null>(null);
-const [isWishlisted, setIsWishlisted] = useState(false);
+  const [user, setUser] = useState<{ id: string; token: string } | null>(null);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
 
-useEffect(() => {
-  const storedUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
-  setUser(storedUser);
-}, []);
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+    setUser(storedUser);
+  }, []);
 
-useEffect(() => {
-  const fetchWishlistStatus = async () => {
-    if (!user?.id || !product?.id) return;
+  useEffect(() => {
+    const fetchWishlistStatus = async () => {
+      if (!user?.id || !product?.id) return;
+
+      try {
+        const data = await productService.isProductWishlisted(product.id, user.id);
+        setIsWishlisted(data.wishlisted);
+      } catch (err) {
+        console.error("Failed to fetch wishlist status", err);
+        setIsWishlisted(false);
+      }
+    };
+
+    fetchWishlistStatus();
+  }, [user?.id, product?.id]);
+
+  const handleWishlistToggle = async () => {
+    if (!user?.id) {
+      alert("🔒 Please log in to manage your wishlist.");
+      return;
+    }
 
     try {
-      const data = await productService.isProductWishlisted(product.id, user.id);
-      setIsWishlisted(data.wishlisted);
+      const data = await productService.toggleWishlist(product!.id, user.id);
+      setIsWishlisted(data.wishlist);
     } catch (err) {
-      console.error("Failed to fetch wishlist status", err);
-      setIsWishlisted(false);
+      console.error("Failed to toggle wishlist", err);
+      alert("❌ Failed to update wishlist.");
     }
   };
-
-  fetchWishlistStatus();
-}, [user?.id, product?.id]);
-
-const handleWishlistToggle = async () => {
-  if (!user?.id) {
-    alert("🔒 Please log in to manage your wishlist.");
-    return;
-  }
-
-  try {
-    const data = await productService.toggleWishlist(product!.id, user.id);
-    setIsWishlisted(data.wishlist);
-  } catch (err) {
-    console.error("Failed to toggle wishlist", err);
-    alert("❌ Failed to update wishlist.");
-  }
-};
 
 
   useEffect(() => {
@@ -314,27 +314,27 @@ const handleWishlistToggle = async () => {
       <div className="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-2 gap-12 min-h-[800px]">
         {/* Images */}
         <div className="space-y-4">
-         <motion.div className="relative overflow-hidden rounded-lg bg-gray-100 w-full max-h-[900px] md:h-[650px]">
-  <img
-    src={product.images[selectedImageIndex] || "/default-product.png"}
-    alt={product.name}
-    className="w-full h-full object-cover"
-  />
+          <motion.div className="relative overflow-hidden rounded-lg bg-gray-100 w-full max-h-[900px] md:h-[650px]">
+            <img
+              src={product.images[selectedImageIndex] || "/default-product.png"}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
 
-  {/* Wishlist Button */}
-  <motion.button
-    whileHover={{ scale: 1.1 }}
-    whileTap={{ scale: 0.95 }}
-    onClick={handleWishlistToggle}
-    className="absolute top-3 left-3 p-2 rounded-full border shadow-sm bg-white z-10"
-  >
-    <Heart
-      className={`w-6 h-6 transition-colors duration-300 ${isWishlisted ? "text-red-500 fill-red-500" : "text-gray-500 hover:text-pink-600"}`}
-    />
-  </motion.button>
-</motion.div>
+            {/* Wishlist Button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleWishlistToggle}
+              className="absolute top-3 left-3 p-2 rounded-full border shadow-sm bg-white z-10"
+            >
+              <Heart
+                className={`w-6 h-6 transition-colors duration-300 ${isWishlisted ? "text-red-500 fill-red-500" : "text-gray-500 hover:text-pink-600"}`}
+              />
+            </motion.button>
+          </motion.div>
 
-          
+
           {product.images.length > 1 && (
             <div className="flex space-x-2 overflow-x-auto">
               {product.images.map((image, index) => (
@@ -489,33 +489,36 @@ const handleWishlistToggle = async () => {
             )}
 
             {/* Actions */}
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleAddToCart}
                 disabled={stock === 0}
-                className="flex-1 bg-pink-600 text-white py-3 px-6 rounded-lg"
+                className="flex-1 bg-pink-600 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base"
               >
                 Add to Cart
               </motion.button>
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleBuyNow}
                 disabled={stock === 0}
-                className="flex-1 bg-orange-600 text-white py-3 px-6 rounded-lg"
+                className="flex-1 bg-orange-600 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base"
               >
                 Buy Now
               </motion.button>
+
               <button
                 onClick={() => setIsShareModalOpen(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
+                className="flex-1 bg-blue-600 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg flex items-center gap-2 justify-center text-sm sm:text-base hover:bg-blue-700"
               >
-                <Share2 className="w-5 h-5" />
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                 Share
               </button>
             </div>
+
           </div>
 
           {/* Share Modal Trigger */}

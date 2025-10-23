@@ -66,7 +66,7 @@ export function Hero() {
   return (
     <section className="relative w-full overflow-hidden h-[40vh] md:h-[88vh]">
       {/* User Info + Logout */}
-      {user && (
+      {/* {user && (
         <div className="absolute top-4 right-6 z-20 flex items-center space-x-4 bg-black/50 px-4 py-2 rounded-full text-white backdrop-blur-sm">
           <span>Hello, {user.name || user.email?.split("@")[0] || "User"}!</span>
           <button
@@ -77,7 +77,7 @@ export function Hero() {
             Logout
           </button>
         </div>
-      )}
+      )} */}
 
       {/* Slideshow */}
       <div className="absolute inset-0 z-0 overflow-hidden">
