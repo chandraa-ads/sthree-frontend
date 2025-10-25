@@ -1,7 +1,15 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Youtube, WebcamIcon } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube,
+} from "lucide-react";
 import SthLogo from "../../assets/icon/Sth_W.svg";
 import WebMedia6Logo from "../../assets/icon/web media 6.svg";
 
@@ -10,7 +18,7 @@ export function Footer() {
   const navigate = useNavigate();
 
   const quickLinks = [
-    { name: "Home", path: "/" },
+    // { name: "Home", path: "/" },
     { name: "Sarees", path: "/category/saree" },
     { name: "Salwar", path: "/category/salwar" },
     { name: "Top & Kurtis", path: "/category/top & kurtis" },
@@ -19,10 +27,10 @@ export function Footer() {
   ];
 
   const customerServiceLinks = [
-    { name: "Size Guide", path: "/size-guide" },
+    { name: "Size Guide", path: "/size" },
     { name: "Shipping Info", path: "/shipping-info" },
     { name: "Returns & Exchanges", path: "/returns" },
-    { name: "Care Instructions", path: "/care-instructions" },
+
   ];
 
   const bottomLinks = [
@@ -33,10 +41,13 @@ export function Footer() {
 
   return (
     <footer className="bg-gray-900 text-white">
+      {/* ===== MAIN FOOTER CONTENT ===== */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand Section */}
-          <div className="space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+          {/* ===== Brand Section ===== */}
+          <div className="flex flex-col space-y-6 flex-1">
+            {/* Logo + Name */}
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center">
               <img src={SthLogo} alt="SthRee" className="h-10 w-auto" />
               <span className="ml-2 text-xl font-bold transition-colors duration-300 hover:text-pink-600">
@@ -44,26 +55,31 @@ export function Footer() {
               </span>
             </motion.div>
 
-            <p className="text-gray-400 text-sm leading-relaxed">
-              Discover the finest collection of traditional and contemporary sarees. Crafted with love, delivered with care.
+            {/* Description */}
+            <p className="text-gray-400 text-[15px] leading-relaxed">
+              Discover the finest collection of traditional and contemporary sarees.
+              Crafted with love, delivered with care.
             </p>
 
-            <div className="flex space-x-4">
-              {[{ Icon: Facebook, link: "#" }, { Icon: Twitter, link: "#" }, { Icon: Instagram, link: "#" }, { Icon: Youtube, link: "#" }].map(({ Icon, link }, idx) => (
-                <motion.a
-                  key={idx}
-                  whileHover={{ scale: 1.1 }}
-                  href={link}
-                  className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors"
-                >
-                  <Icon className="w-4 h-4" />
-                </motion.a>
-              ))}
+            {/* Social Icons */}
+            <div className="flex space-x-5 pt-2">
+              {[{ Icon: Facebook }, { Icon: Twitter }, { Icon: Instagram }, { Icon: Youtube }].map(
+                ({ Icon }, idx) => (
+                  <motion.a
+                    key={idx}
+                    whileHover={{ scale: 1.1 }}
+                    href="#"
+                    className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors"
+                  >
+                    <Icon className="w-4 h-4" />
+                  </motion.a>
+                )
+              )}
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
+          {/* ===== Quick Links ===== */}
+          <div className="flex flex-col space-y-3 flex-1">
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
@@ -72,28 +88,30 @@ export function Footer() {
                     whileHover={{ x: 5 }}
                     onClick={() => {
                       navigate(link.path);
-                      window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top smoothly
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
-                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                    className="text-gray-400 hover:text-white transition-colors text-sm text-left"
                   >
                     {link.name}
                   </motion.button>
-
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Customer Service */}
-          <div>
+          {/* ===== Customer Service ===== */}
+          <div className="flex flex-col space-y-3 flex-1">
             <h3 className="text-lg font-semibold mb-4">Customer Service</h3>
             <ul className="space-y-2">
               {customerServiceLinks.map((link) => (
                 <li key={link.name}>
                   <motion.button
                     whileHover={{ x: 5 }}
-                    onClick={() => navigate(link.path)}
-                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                    onClick={() => {
+                      navigate(link.path);
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    className="text-gray-400 hover:text-white transition-colors text-sm text-left"
                   >
                     {link.name}
                   </motion.button>
@@ -102,12 +120,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info */}
-          <div>
+
+          {/* ===== Contact Info ===== */}
+          <div className="flex flex-col space-y-3 flex-1">
             <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <MapPin className="w-4 h-4 text-pink-500 flex-shrink-0" />
+              <div className="flex items-start space-x-3">
+                <MapPin className="w-4 h-4 text-pink-500 flex-shrink-0 mt-1" />
                 <a
                   href="https://www.google.com/maps/search/?api=1&query=65,+Tatabad+1st+Street,+Coimbatore+-+641+012"
                   target="_blank"
@@ -143,7 +162,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom Section */}
+
+        {/* ===== Bottom Section ===== */}
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-gray-400 text-sm">
@@ -165,7 +185,7 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Payment Methods / Powered by Section */}
+      {/* ===== Powered by Section ===== */}
       <div className="bg-gray-800 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-center text-center space-y-2">

@@ -314,7 +314,7 @@ export function ProductDetail() {
       <div className="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-2 gap-12 min-h-[800px]">
         {/* Images */}
         <div className="space-y-4">
-          <motion.div className="relative overflow-hidden rounded-lg bg-gray-100 w-full max-h-[900px] md:h-[650px]">
+          <motion.div className="relative overflow-hidden rounded-lg bg-gray-100 w-[85%] mx-auto h-[750px] sm:h-[800px] lg:h-[850px]">
             <img
               src={product.images[selectedImageIndex] || "/default-product.png"}
               alt={product.name}
@@ -342,7 +342,7 @@ export function ProductDetail() {
                   <img
                     src={image}
                     alt={`${product.name}-${index}`}
-                    className={`w-20 h-20 object-cover rounded-lg ${selectedImageIndex === index ? "ring-2 ring-pink-600" : ""
+                    className={`w-10 h-20 object-cover rounded-lg ${selectedImageIndex === index ? "ring-2 ring-pink-600" : ""
                       }`}
                   />
                 </button>
@@ -372,21 +372,21 @@ export function ProductDetail() {
           </div>
 
           {/* Price */}
-          <div className="flex items-center gap-3 mt-2">
+          <div className="flex items-center gap-2 mt-2">
             {/* Discounted price */}
-            <span className="text-3xl font-extrabold text-gray-900">
+            <span className="text-xl font-bold text-gray-900">
               ₹{currentPrice.toLocaleString()}
             </span>
 
             {/* Original price (strikethrough) */}
             {originalPrice && originalPrice > currentPrice && (
               <>
-                <span className="text-xl text-gray-500 line-through">
+                <span className="text-sm text-gray-500 line-through">
                   ₹{originalPrice.toLocaleString()}
                 </span>
 
                 {/* Discount percentage */}
-                <span className="text-green-600 font-semibold text-lg">
+                <span className="text-green-600 font-medium text-sm">
                   {discountPercentage}% OFF
                 </span>
               </>
@@ -394,17 +394,18 @@ export function ProductDetail() {
           </div>
 
 
-          <div className="grid grid-cols-2 gap-6 mb-0"> {/* removed mb-4 */}
+
+          <div className="grid grid-cols-1 gap-6 mb-0"> {/* removed mb-4 */}
             {/* Color Column */}
             {product.variants?.length > 0 && (
               <div>
-                <h3 className="font-semibold mb-1">Color</h3>
-                <div className="flex flex-row gap-2 overflow-x-auto">
+                <h3 className="font-semibold mb-1 text-sm">Color</h3>
+                <div className="flex flex-row gap-1.5 overflow-x-auto">
                   {product.variants.map((variant) => (
                     <button
                       key={variant.id}
                       onClick={() => handleVariantChange(variant)}
-                      className={`px-4 py-2 border rounded-lg ${selectedVariant?.id === variant.id
+                      className={`px-2.5 py-1.5 border rounded-md text-xs ${selectedVariant?.id === variant.id
                         ? "border-pink-600 bg-pink-50"
                         : "border-gray-300"
                         }`}
@@ -416,26 +417,38 @@ export function ProductDetail() {
               </div>
             )}
 
+
             {/* Size Column */}
-            {getAvailableSizes().length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-1">Size</h3>
-                <div className="flex flex-row gap-2 overflow-x-auto">
-                  {getAvailableSizes().map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border rounded-lg ${selectedSize === size
-                        ? "border-pink-600 bg-pink-50"
-                        : "border-gray-300"
-                        }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+            {(() => {
+              const allSizes = ["Free","XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+              const availableSizes = getAvailableSizes();
+
+              return (
+                <div>
+                  <h3 className="font-semibold mb-1">Size</h3>
+                  <div className="flex flex-row flex-wrap gap-2">
+                    {allSizes.map((size) => {
+                      const isAvailable = availableSizes.includes(size);
+                      return (
+                        <button
+                          key={size}
+                          onClick={() => isAvailable && setSelectedSize(size)}
+                          disabled={!isAvailable}
+                          className={`px-3 py-1.5 border rounded-lg text-sm transition 
+                ${selectedSize === size
+                              ? "border-pink-600 bg-pink-50 text-pink-700"
+                              : "border-gray-300"} 
+                ${!isAvailable ? "opacity-50 cursor-not-allowed bg-gray-100" : "hover:border-pink-400"}`}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
+
           </div>
 
           {/* About / Description / Product Details */}
@@ -460,7 +473,7 @@ export function ProductDetail() {
             {product.product_detail && (
               <div className="mb-6">
                 <h4 className="text-2xl font-semibold mb-2 text-gray-900">Product Details</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-1 gap-x-6 text-gray-700">
                   {(() => {
                     let productDetails: Record<string, any> = {};
 
@@ -478,15 +491,21 @@ export function ProductDetail() {
                     }
 
                     return Object.entries(productDetails).map(([key, value]) => (
-                      <div key={key} className="flex justify-between py-2"> {/* removed border-b */}
-                        <span className="font-medium capitalize">{key.replace(/_/g, " ")}</span>
-                        <span>{String(value)}</span>
+                      <div
+                        key={key}
+                        className="text-sm flex items-center"
+                      >
+                        <span className="font-semibold text-gray-900 capitalize">
+                          {key.replace(/_/g, " ")} :
+                        </span>
+                        <span className="ml-1 text-gray-700">{String(value)}</span>
                       </div>
                     ));
                   })()}
                 </div>
               </div>
             )}
+
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
@@ -752,3 +771,4 @@ export function ProductDetail() {
     </div>
   );
 }
+

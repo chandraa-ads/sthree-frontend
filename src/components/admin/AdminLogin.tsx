@@ -1,16 +1,21 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // ✅ import
+import bgImg from '../../assets/icon/admin.png';
+import logo from '../../assets/icon/sth_ree.svg';
 
 interface AdminLoginProps {
   onLoginSuccess: (token: string) => void;
 }
 
-const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState("akashperumal4@gmail.com"); // default for testing
+const ModernAdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
+  const navigate = useNavigate(); // ✅ initialize navigate
+  const [email, setEmail] = useState("akashperumal4@gmail.com");
   const [password, setPassword] = useState("Password123!");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     try {
       const response = await axios.post("http://localhost:3000/auth/admin/login", {
@@ -20,7 +25,9 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
       const token = response.data.token;
       localStorage.setItem("adminToken", token);
       onLoginSuccess(token);
-      alert("Admin login successful!");
+      
+      // ✅ redirect after login
+      navigate("/admin/dashboard");
     } catch (error) {
       alert("Login failed");
       console.error(error);
@@ -30,31 +37,45 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <h2 className="text-xl font-bold mb-4">Admin Login</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 mb-2 w-full"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="border p-2 mb-4 w-full"
-      />
-      <button
-        onClick={handleLogin}
-        disabled={loading}
-        className={`w-full py-2 px-4 rounded mb-6 text-white ${loading ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"}`}
-      >
-        {loading ? "Logging in..." : "Login"}
-      </button>
+    <div
+      className="h-screen w-full flex items-center justify-center bg-cover bg-center"
+      style={{ backgroundImage: `url(${bgImg})` }}
+    >
+      <div className="w-full max-w-md p-10 rounded-3xl bg-white/30 backdrop-blur-lg border border-white/20 shadow-xl flex flex-col items-center">
+        <img src={logo} alt="Logo" className="h-20 w-40 rounded-full mb-4" />
+        <h1 className="text-2xl font-bold text-white mb-1">Welcome Back</h1>
+        <p className="text-sm text-white mb-6">Sign in to continue</p>
+
+        <form className="w-full flex flex-col gap-4" onSubmit={handleLogin}>
+          <input
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl placeholder-black-700 text-pink-700 border border-white/30 focus:outline-none focus:ring-2 focus:ring-pink-300 shadow-sm transition"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl placeholder-black-700 text-pink-700 border border-white/30 focus:outline-none focus:ring-2 focus:ring-pink-300 shadow-sm transition"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full py-3 mt-2 rounded-xl text-white font-semibold shadow-lg transition-all ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-pink-400 to-pink-500 hover:scale-105 hover:shadow-2xl"
+            }`}
+          >
+            {loading ? "Logging in..." : "Sign In"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
 
-export default AdminLogin;
+export default ModernAdminLogin;

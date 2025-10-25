@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X, ArrowLeft } from "lucide-react";
-import google from "../../assets/icon/google.png";
 import introBanner from "../../assets/icon/intro1.jpeg";
+import sreeLogo from "../../assets/icon/Sth_W.svg"; // ✅ your logo image
 
 interface Props {
   isOpen: boolean;
@@ -9,9 +9,7 @@ interface Props {
   setIsLoggedIn: (loggedIn: boolean, name?: string) => void;
 }
 
-
 const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
-
   const [isSignup, setIsSignup] = useState(false);
   const [generatedOTP, setGeneratedOTP] = useState<number | null>(null);
   const [otpInput, setOtpInput] = useState("");
@@ -22,15 +20,13 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
   const [successMsg, setSuccessMsg] = useState("");
   const [isForgot, setIsForgot] = useState(false);
   const [newPassword, setNewPassword] = useState("");
-
   const [user, setUser] = useState<{ name?: string; email: string } | null>(
     null
   );
-
-
   const [googleIdToken, setGoogleIdToken] = useState("");
+  const [forgotEmail, setForgotEmail] = useState("");
 
-  // Load user from localStorage on mount or when modal opens
+  // Load user from localStorage when modal opens
   useEffect(() => {
     if (isOpen) {
       const stored = localStorage.getItem("loggedInUser");
@@ -38,19 +34,18 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
     }
   }, [isOpen]);
 
-  // Save user
+  // Save user data
   useEffect(() => {
     if (user) localStorage.setItem("loggedInUser", JSON.stringify(user));
   }, [user]);
 
-  // Google login
+  // Initialize Google buttons
   useEffect(() => {
     if (!isOpen || !(window as any).google) return;
 
     const initializeGoogle = () => {
       try {
         const win: any = window;
-
         win.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
           callback: handleGoogleResponse,
@@ -84,6 +79,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
     initializeGoogle();
   }, [isOpen]);
 
+  // ✅ Signup
   const handleSignup = async (email: string) => {
     if (!email) {
       setOtpMsg("❌ Please enter your email.");
@@ -91,10 +87,14 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
     }
 
     const usernameInput = (
-      document.querySelector('input[placeholder="User Name"]') as HTMLInputElement
+      document.querySelector(
+        'input[placeholder="User Name"]'
+      ) as HTMLInputElement
     )?.value;
     const passwordInput = (
-      document.querySelector('input[placeholder="Enter Your Password"]') as HTMLInputElement
+      document.querySelector(
+        'input[placeholder="Enter Your Password"]'
+      ) as HTMLInputElement
     )?.value;
 
     if (!usernameInput || !passwordInput) {
@@ -107,12 +107,11 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email,
+          email,
           username: usernameInput,
           password: passwordInput,
         }),
       });
-
 
       if (res.status === 409) {
         setOtpMsg("❌ Email already registered. Try logging in.");
@@ -131,7 +130,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
     }
   };
 
-
+  // ✅ Verify OTP after signup
   const handleVerify = async () => {
     if (!otpInput || !email) {
       setOtpMsg("❌ Please enter OTP!");
@@ -148,26 +147,18 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "OTP verification failed");
 
-      // OTP verified successfully
-      alert("✅ Registration successful! Please log in."); // show alert instead of inline message
-
-      // Clear OTP fields
+      alert("✅ Registration successful! Please log in.");
       setOtpInput("");
       setShowOtpInput(false);
       setGeneratedOTP(null);
-
-      // Switch back to login form
       setIsSignup(false);
-
-      // Optionally clear email input
       setEmail("");
-
     } catch (err: any) {
       setOtpMsg(`❌ ${err.message}`);
     }
   };
 
-
+  // ✅ Google login
   const handleGoogleResponse = async (response: any) => {
     const token = response.credential;
     try {
@@ -179,10 +170,10 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
-      const emailUsername = data.user.email.split("@")[0];
 
+      const emailUsername = data.user.email.split("@")[0];
       const userData = {
-        id: data.user.id,         // add this
+        id: data.user.id,
         email: data.user.email,
         name: data.user.name || emailUsername,
         token: data.token,
@@ -192,53 +183,89 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
       localStorage.setItem("loggedInUser", JSON.stringify(userData));
       setSuccessMsg("✅ Login successful!");
       setIsLoggedIn(true, userData.name);
-      setOtpMsg("✅ Google login successful!");
       onClose();
     } catch (err: any) {
       setOtpMsg(`❌ ${err.message}`);
     }
   };
 
-
-
-  const handleVerifyOtpForGoogle = async () => {
-    if (!otpInput) {
-      setOtpMsg("❌ Please enter OTP!");
+  // ✅ Forgot Password
+  const handleForgotPassword = async (emailParam: string) => {
+    if (!emailParam) {
+      setOtpMsg("❌ Please enter your registered email.");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:3000/auth/user/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: otpInput }),
-      });
+      const res = await fetch(
+        "http://localhost:3000/auth/user/forgot-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: emailParam }),
+        }
+      );
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "OTP verification failed");
+      if (!res.ok) throw new Error(data.message || "Failed to send OTP");
 
-      const userData = {
-        email,
-        name: "",
-      };
-      setUser(userData);
-      localStorage.setItem("loggedInUser", JSON.stringify(userData));
-
-      setOtpMsg("✅ Google Account Verified!");
-      setOtpInput("");
-      setShowOtpInput(false);
-      onClose();
-    } catch (error: any) {
-      setOtpMsg(`❌ ${error.message}`);
+      setOtpMsg("📩 OTP sent to your email. Please enter it below.");
+      setShowOtpInput(true);
+    } catch (err: any) {
+      setOtpMsg(`❌ ${err.message}`);
     }
   };
 
+  // ✅ Reset Password
+  const handleResetPassword = async () => {
+    if (!forgotEmail || !otpInput || !newPassword) {
+      setOtpMsg("❌ Enter your email, OTP, and new password.");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        "http://localhost:3000/auth/user/reset-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: forgotEmail, // ✅ use forgotEmail
+            reset_code: otpInput,
+            new_password: newPassword,
+          }),
+        }
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Reset failed");
+
+      alert("✅ Password reset successful! Please log in.");
+      setIsForgot(false);
+      setOtpInput("");
+      setNewPassword("");
+      setOtpMsg("");
+      setShowOtpInput(false);
+    } catch (err: any) {
+      setOtpMsg(`❌ ${err.message}`);
+    }
+  };
+
+  // ✅ Login
   const handleLogin = async () => {
-    const emailInput = (document.querySelector('input[placeholder="Enter Your Email"]') as HTMLInputElement)?.value;
-    const passwordInput = (document.querySelector('input[placeholder="Password"]') as HTMLInputElement)?.value;
+    const emailInput = (
+      document.querySelector(
+        'input[placeholder="Enter Your Email"]'
+      ) as HTMLInputElement
+    )?.value;
+    const passwordInput = (
+      document.querySelector(
+        'input[placeholder="Password"]'
+      ) as HTMLInputElement
+    )?.value;
 
     if (!emailInput || !passwordInput) {
-      setOtpMsg("❌ Please enter both email and password.");
+      alert("❌ Please enter both email and password.");
       return;
     }
 
@@ -251,7 +278,13 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Login failed");
+
+      if (!res.ok) {
+        // If login fails, show alert with the server message
+        alert(`❌ Login failed: ${data.message || "Invalid credentials"}`);
+        setOtpMsg(`❌ ${data.message || "Invalid credentials"}`);
+        return;
+      }
 
       const userData = {
         id: data.id,
@@ -263,80 +296,17 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
 
       localStorage.setItem("loggedInUser", JSON.stringify(userData));
       setUser(userData);
+      alert("✅ Login successful!");
       setOtpMsg("✅ Login successful!");
       setIsLoggedIn(true, userData.name);
       onClose();
     } catch (error: any) {
+      alert(`❌ Login failed: ${error.message}`);
       setOtpMsg(`❌ ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
-
-
-
-  const handleForgotPassword = async () => {
-    if (!email) {
-      setOtpMsg("❌ Please enter your email!");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("http://localhost:3000/auth/user/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to send OTP");
-
-      setOtpMsg("📩 OTP sent! Check your email.");
-      setShowOtpInput(true);
-    } catch (err: any) {
-      setOtpMsg(`❌ ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!otpInput || !newPassword) {
-      setOtpMsg("❌ Please enter OTP and new password!");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch("http://localhost:3000/auth/user/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, reset_code: otpInput, new_password: newPassword }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to reset password");
-
-      alert("✅ Password reset successful! You can now log in.");
-      setIsForgot(false);
-      setOtpInput("");
-      setNewPassword("");
-      setShowOtpInput(false);
-      setOtpMsg("");
-    } catch (err: any) {
-      setOtpMsg(`❌ ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-
-
-  const handleLogout = () => {
-  setUser(null);
-  localStorage.removeItem("loggedInUser");
-  setIsLoggedIn(false);
-};
-
-
 
   if (!isOpen) return null;
 
@@ -351,172 +321,167 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
             setIsSignup(false);
             setGeneratedOTP(null);
             setOtpInput("");
-            setSuccessMsg("✅ Login successful!");
+            setSuccessMsg("");
             setOtpMsg("");
             setShowOtpInput(false);
             setGoogleIdToken("");
             setEmail("");
-            // Do NOT clear user or localStorage here
           }}
         >
           <X size={20} />
         </button>
 
-        {/* Greeting */}
-        {/* {user && (
-          <div className="absolute top-3 left-4 text-lg font-semibold text-cyan-700 z-20">
-            Hello {user.name || user.email.split("@")[0]}!
+        {/* ✅ Sree Logo Position Logic */}
+        {isSignup ? (
+          <div className="absolute top-4 right-10 z-20 ">
+            <img
+              src={sreeLogo}
+              alt="Sree Logo"
+              className="w-20 h-auto object-contain"
+            />
           </div>
-        )} */}
+        ) : (
+          <div className="absolute top-2 left-4 z-20">
+            <img
+              src={sreeLogo}
+              alt="Sree Logo"
+              className="w-20 h-auto object-contain"
+            />
+          </div>
+        )}
 
         {/* Banner Image */}
         <div
-          className={`absolute right-0 top-0 w-1/2 h-full transition-transform duration-500 z-10 ${isSignup ? "-translate-x-full" : "translate-x-0"
-            }`}
+          className={`absolute right-0 top-0 w-1/2 h-full transition-transform duration-500 z-10 ${
+            isSignup ? "-translate-x-full" : "translate-x-0"
+          }`}
         >
           <img
             src={introBanner}
             alt="banner"
             className="w-full h-full object-cover"
           />
-
         </div>
 
-        {/* Login Form */}
+        {/* Login / Forgot Password Form */}
         <div
-          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${isSignup || isForgot ? "-translate-x-full" : "translate-x-0"
-            }`}
+          className={`absolute left-0 top-2 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${
+            isSignup ? "-translate-x-full" : "translate-x-0"
+          }`}
         >
-          <h1 className="text-xl font-semibold">Log In</h1>
-          <p className="text-xs text-gray-600">
-            Login to your account to upload or download pictures, videos, or music.
-          </p>
+          {!isForgot ? (
+            <>
+              {/* Login Form */}
+              <h1 className="text-2xl font-semibold text-gray-800">Log In</h1>
+              <p className="text-sm text-gray-600 mb-4">Welcome Back!</p>
 
-          <input
-            type="email"
-            placeholder="Enter Your Email"
-            className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
-          />
-
-          <div className="flex items-center justify-between">
-            <span
-              className="text-xs text-cyan-700 cursor-pointer"
-              onClick={() => {
-                setIsForgot(true);
-                setOtpMsg("");
-                setShowOtpInput(false);
-              }}
-            >
-              Forgot Password?
-            </span>
-
-            <button
-              className="bg-cyan-700 text-white rounded-md px-4 py-1"
-              onClick={handleLogin}
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-              ) : (
-                "Login"
-              )}
-            </button>
-          </div>
-
-          {/* Google Login Button */}
-          <div className="flex justify-center mt-6" id="googleLoginBtn"></div>
-
-          <span className="text-xs mt-4">
-            Don't have an account yet?{" "}
-            <span
-              className="text-cyan-700 cursor-pointer hover:underline"
-              onClick={() => setIsSignup(true)}
-            >
-              Sign Up
-            </span>
-          </span>
-        </div>
-
-        {/* Forgot Password Form */}
-        {isForgot && (
-          <div
-            className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 translate-x-0`}
-          >
-            <h1 className="text-xl font-semibold">Forgot Password</h1>
-
-            <input
-              type="email"
-              placeholder="Enter Your Email"
-              className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            {!showOtpInput && (
+              <input
+                type="email"
+                placeholder="Enter Your Email"
+                className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                type="password"
+                placeholder="Password"
+                className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
+              />
               <button
-                className="bg-cyan-700 text-white rounded-md px-4 py-1 mt-2"
-                onClick={handleForgotPassword}
-                disabled={loading}
+                className="bg-cyan-700 text-white rounded-md px-4 py-2 mt-2 hover:bg-cyan-800 transition"
+                onClick={handleLogin}
               >
-                Send OTP
+                Login
               </button>
-            )}
 
-            {showOtpInput && (
-              <>
-                <input
-                  type="text"
-                  placeholder="Enter OTP"
-                  className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600 mt-2"
-                  value={otpInput}
-                  onChange={(e) => setOtpInput(e.target.value)}
-                />
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600 mt-2"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <button
-                  className="bg-cyan-700 text-white rounded-md px-4 py-1 mt-2"
-                  onClick={handleResetPassword}
-                  disabled={loading}
+              {/* Forgot Password Link */}
+              <span
+                className="text-xs text-cyan-700 cursor-pointer hover:underline mt-2"
+                onClick={() => {
+                  setIsForgot(true);
+                  setForgotEmail("");
+                  setOtpInput("");
+                  setShowOtpInput(false);
+                  setOtpMsg("");
+                }}
+              >
+                Forgot Password?
+              </span>
+
+              {/* Google Login */}
+              <div
+                className="flex justify-center mt-6"
+                id="googleLoginBtn"
+              ></div>
+
+              {/* Signup Link */}
+              <span className="text-xs mt-4 text-center">
+                Don't have an account yet?{" "}
+                <span
+                  className="text-cyan-700 cursor-pointer hover:underline"
+                  onClick={() => setIsSignup(true)}
                 >
-                  Reset Password
+                  Sign Up
+                </span>
+              </span>
+            </>
+          ) : (
+            <>
+              {/* Forgot Password Form */}
+              <h1 className="text-xl font-semibold">Forgot Password</h1>
+              <input
+                type="email"
+                placeholder="Enter Your Registered Email"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
+              />
+
+              {!showOtpInput ? (
+                <button
+                  className="bg-cyan-700 text-white rounded-md px-4 py-2 mt-2 hover:bg-cyan-800 transition"
+                  onClick={() => handleForgotPassword(forgotEmail)}
+                >
+                  Send OTP
                 </button>
-              </>
-            )}
+              ) : (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Enter OTP"
+                    value={otpInput}
+                    onChange={(e) => setOtpInput(e.target.value)}
+                    className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Enter New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
+                  />
+                  <button
+                    className="bg-cyan-700 text-white rounded-md px-4 py-2 mt-2 hover:bg-cyan-800 transition"
+                    onClick={handleResetPassword}
+                  >
+                    Reset Password
+                  </button>
+                </>
+              )}
 
-            {otpMsg && <div className="text-xs text-cyan-700 mt-1">{otpMsg}</div>}
-
-            <span
-              className="text-xs text-cyan-700 cursor-pointer mt-2 inline-block"
-              onClick={() => {
-                setIsForgot(false);
-                setOtpMsg("");
-                setShowOtpInput(false);
-              }}
-            >
-              Back to Login
-            </span>
-          </div>
-        )}
-
+              {otpMsg && (
+                <div className="text-xs text-cyan-700 mt-2">{otpMsg}</div>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Signup Form */}
         <div
-          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${isSignup ? "translate-x-full" : "translate-x-[200%]"
-            }`}
+          className={`absolute left-0 top-0 w-1/2 h-full p-10 flex flex-col justify-center gap-4 transition-transform duration-500 ${
+            isSignup ? "translate-x-full" : "translate-x-[200%]"
+          }`}
         >
-          {/* Back button */}
           <button
             className="absolute top-3 left-3 bg-gray-200 hover:bg-gray-300 rounded-full p-1 z-20"
             onClick={() => {
@@ -538,11 +503,9 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
             type="text"
             placeholder="User Name"
             className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
-            id="signup-username"
           />
           <input
             type="email"
-            id="signup-email"
             placeholder="Enter Your Email"
             className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
             onChange={(e) => setEmail(e.target.value)}
@@ -551,10 +514,8 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
             type="password"
             placeholder="Enter Your Password"
             className="border-2 border-gray-300 rounded-md h-10 px-3 outline-none focus:border-cyan-600"
-            id="signup-password"
           />
 
-          {/* Register Button */}
           {!generatedOTP && !showOtpInput && (
             <button
               className="bg-cyan-700 text-white rounded-md px-4 py-1"
@@ -564,7 +525,6 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
             </button>
           )}
 
-          {/* OTP Verification */}
           {showOtpInput && (
             <div className="mt-2 flex flex-col gap-2">
               <input
@@ -577,19 +537,20 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
               {otpMsg && <div className="text-xs text-cyan-700">{otpMsg}</div>}
               <button
                 className="bg-cyan-700 text-white rounded-md px-4 py-1"
-                onClick={generatedOTP ? handleVerify : handleVerifyOtpForGoogle}
+                onClick={handleVerify}
               >
                 Verify OTP
               </button>
             </div>
           )}
 
-          {/* Google Signup Button */}
           {!showOtpInput && (
-            <div className="flex justify-center mt-3" id="googleSignupBtn"></div>
+            <div
+              className="flex justify-center mt-3"
+              id="googleSignupBtn"
+            ></div>
           )}
 
-          {/* Already have account */}
           <span className="text-xs mt-2">
             Already have an account?{" "}
             <span
@@ -600,14 +561,9 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
             </span>
           </span>
         </div>
-
       </div>
     </div>
   );
 };
 
 export default LoginSignup;
-function setIsLoggedIn(arg0: boolean, name: any) {
-  throw new Error("Function not implemented.");
-}
-  

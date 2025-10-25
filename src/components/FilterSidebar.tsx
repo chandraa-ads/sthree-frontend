@@ -19,6 +19,7 @@ interface FilterSidebarProps {
   categories: string[];
   brands: string[];
   colors: string[];
+  className?: string;
 }
 
 export function FilterSidebar({ 
@@ -28,8 +29,10 @@ export function FilterSidebar({
   onFilterChange, 
   categories, 
   brands, 
-  colors 
+  colors,
+  className = '' // ✅ default to empty string
 }: FilterSidebarProps) {
+
   const handleFilterChange = (key: keyof FilterState, value: string | number) => {
     onFilterChange({ ...filters, [key]: value });
   };

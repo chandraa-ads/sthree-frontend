@@ -14,9 +14,12 @@ interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: {
+    id: string | number;
     title: string;
     price: number;
     image: string;
+    sizes?: string[];
+    color?: string;
   };
   productUrl: string;
   onCopySuccess: () => void;
@@ -31,7 +34,9 @@ export function ShareModal({
   onCopySuccess,
   copyStatus,
 }: ShareModalProps) {
-  const shareText = `Check out this beautiful product: ${product.title} - ₹${product.price.toLocaleString()}`;
+  const shareText = `Check out this beautiful product: ${
+    product.title
+  } - ₹${product.price.toLocaleString()}`;
   const encodedText = encodeURIComponent(shareText);
   const encodedUrl = encodeURIComponent(productUrl);
 
@@ -50,12 +55,22 @@ export function ShareModal({
     }
   };
 
+  // Format product details as multi-line text
+  const formattedProductText = `
+${product.title}
+Price: ₹${product.price.toLocaleString()}
+Link: ${productUrl}
+`.trim();
+
+  const encodedWhatsAppText = encodeURIComponent(formattedProductText);
+
+  // Share options
   const shareOptions = [
     {
       name: "WhatsApp",
       icon: MessageCircle,
       color: "bg-green-500 hover:bg-green-600",
-      url: `https://wa.me/?text=${encodedText}%20${encodedUrl}`,
+      url: `https://wa.me/?text=${encodedWhatsAppText}`,
     },
     {
       name: "Email",
@@ -63,19 +78,21 @@ export function ShareModal({
       color: "bg-blue-500 hover:bg-blue-600",
       url: `mailto:?subject=${encodeURIComponent(
         product.title
-      )}&body=${encodedText}%20${encodedUrl}`,
+      )}&body=${encodedWhatsAppText}`,
     },
     {
       name: "Facebook",
       icon: Facebook,
       color: "bg-blue-600 hover:bg-blue-700",
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+        productUrl
+      )}&quote=${encodeURIComponent(formattedProductText)}`,
     },
     {
       name: "Twitter",
       icon: Twitter,
       color: "bg-sky-500 hover:bg-sky-600",
-      url: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`,
+      url: `https://twitter.com/intent/tweet?text=${encodedWhatsAppText}`,
     },
   ];
 
@@ -110,21 +127,47 @@ export function ShareModal({
             </div>
 
             {/* Product Preview */}
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center space-x-4">
+            <div className="p-6 border-b border-gray-200 space-y-4">
+              {/* Image (clickable) */}
+              <a href={productUrl} target="_blank" rel="noopener noreferrer">
                 <img
                   src={product.image}
                   alt={product.title}
-                  className="w-16 h-16 object-cover rounded-lg"
+                  className="w-32 h-32 object-cover rounded-lg cursor-pointer hover:scale-105 transition-transform"
                 />
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 truncate">
-                    {product.title}
-                  </h4>
-                  <p className="text-lg font-bold text-pink-600">
-                    ₹{product.price.toLocaleString()}
+              </a>
+
+              {/* Product details */}
+              <div className="space-y-1">
+                <h4 className="font-medium text-gray-900 text-lg">
+                  {product.title}
+                </h4>
+                <p className="text-pink-600 font-bold text-lg">
+                  ₹{product.price.toLocaleString()}
+                </p>
+                {product.sizes && product.sizes.length > 0 && (
+                  <p className="text-sm text-gray-500">
+                    Sizes: {product.sizes.join(", ")}
                   </p>
-                </div>
+                )}
+                {product.color && (
+                  <p className="text-sm text-gray-500">
+                    Color: {product.color}
+                  </p>
+                )}
+
+                {/* Clickable link */}
+                <p className="text-sm text-gray-500">
+                  Link:{" "}
+                  <a
+                    href={productUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-pink-600 underline hover:text-pink-700"
+                  >
+                    {productUrl}
+                  </a>
+                </p>
               </div>
             </div>
 

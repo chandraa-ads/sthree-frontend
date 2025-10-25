@@ -163,15 +163,16 @@ export function Home() {
         <div className="flex flex-col lg:flex-row px-4 sm:px-6 lg:px-8 gap-4">
           {/* Filters Sidebar */}
           <FilterSidebar
-            isOpen={isFilterOpen}
-            onClose={handleCloseFilters}
-            filters={filters}
-            onFilterChange={setFilters}
-            categories={categories}
-            brands={brands}
-            colors={colors}
-          // className="flex-shrink-0 lg:sticky lg:top-[120px] lg:h-[calc(100vh-120px)]"
-          />
+  isOpen={isFilterOpen}
+  onClose={handleCloseFilters}
+  filters={filters}
+  onFilterChange={setFilters}
+  categories={categories}
+  brands={brands}
+  colors={colors}
+  className="lg:sticky lg:top-[120px] lg:h-[calc(100vh-120px)] overflow-y-auto"
+/>
+
 
           {/* Main Content */}
           <div className="flex-1 flex flex-col">

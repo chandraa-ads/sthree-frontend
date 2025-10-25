@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, User, Search, Menu, X, Heart } from "lucide-react";
+import { ShoppingCart, User, Search, Menu, X, Heart, LogOut } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import LoginSignup from "../auth/LoginSignup";
+import { productService } from "../products/ProductService";
 
 import logoImg from "../../assets/icon/sth_ree.svg";
 import sareeIcon from "../../assets/icon/Saree.png";
@@ -13,6 +14,7 @@ import homeIcon from "../../assets/icon/home.png";
 import dupattaIcon from "../../assets/icon/dupatta.png";
 import accessoriesIcon from "../../assets/icon/accessories.png";
 import mens from "../../assets/icon/mens.png";
+import { ProductCard } from "../ProductCard";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,28 +22,48 @@ export default function Navbar() {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const categories = [
     { name: "SAREE", icon: sareeIcon },
     { name: "SALWAR", icon: salwarIcon },
-    { name: "TOP & KURTIS", icon: kuruthaIcon },
+    { name: "TOP & KURTHI", icon: kuruthaIcon },
     { name: "KIDS WEAR", icon: kidsIcon },
     { name: "HOME WEAR", icon: homeIcon },
     { name: "DUPATTA", icon: dupattaIcon },
     { name: "ACCESSORIES", icon: accessoriesIcon },
     { name: "MENS", icon: mens },
-    { name: "PROFILE", icon: User },
   ];
 
-  // Check login status on mount
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
+
+  // Check login status
   useEffect(() => {
     const storedUser = localStorage.getItem("loggedInUser");
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setUserName(user.name);
+      setUserEmail(user.email);
       setIsLoggedIn(true);
     }
   }, []);
@@ -50,7 +72,6 @@ export default function Navbar() {
   useEffect(() => {
     const el = bannerRef.current;
     if (!el) return;
-
     let x = 0;
     const speed = 0.5;
     let frameId: number;
@@ -73,23 +94,43 @@ export default function Navbar() {
     }
   }, [location]);
 
-const handleCategoryClick = (category: string) => {
-  if (category === "PROFILE") {
-    if (isLoggedIn) {
-      navigate("/userprofile");
+  const handleCategoryClick = (category: string) => {
+    if (category === "PROFILE") {
+      if (isLoggedIn) {
+        navigate("/userprofile");
+      } else {
+        alert("🔒 Please log in to access your profile.");
+        setIsLoginOpen(true);
+      }
     } else {
-      alert("🔒 Please log in to access your profile.");
-      setIsLoginOpen(true); // Optional: open login modal
+      setSelectedCategory(category);
+      navigate(`/category/${category.toLowerCase()}`);
     }
-  } else {
-    setSelectedCategory(category);
-    navigate(`/category/${category.toLowerCase()}`);
-  }
+    setIsMenuOpen(false);
+  };
 
-  setIsMenuOpen(false);
-};
+  // Search products (small dropdown preview)
+  useEffect(() => {
+    if (!searchQuery) {
+      setSearchResults([]);
+      return;
+    }
 
+    const debounceTimer = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const response = await productService.filterProducts({ name: searchQuery, limit: 10 });
+        setSearchResults(response.data || []);
+      } catch (err) {
+        console.error(err);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
 
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
@@ -97,6 +138,16 @@ const handleCategoryClick = (category: string) => {
     localStorage.removeItem("adminToken");
     setIsLoggedIn(false);
     setUserName(null);
+    setUserEmail(null);
+    setShowDropdown(false);
+  };
+
+  // Navigate to search results page
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && searchQuery.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
   };
 
   return (
@@ -104,56 +155,92 @@ const handleCategoryClick = (category: string) => {
       {/* Navbar */}
       <nav className="bg-[#fdfaf3] border-b border-gray-200 w-full sticky top-0 z-50 font-serif">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-30">
-          {/* Logo */}
-          <button onClick={() => navigate("/")} className="flex items-center">
-            <img src={logoImg} alt="Logo" className="h-20 w-auto object-contain" />
-          </button>
+          {/* Left section: Logo */}
+          <div className="flex items-center space-x-4">
+            <button onClick={() => navigate("/")} className="flex items-center">
+              <img src={logoImg} alt="Logo" className="h-20 w-auto object-contain" />
+            </button>
+          </div>
 
-          {/* Search */}
+          {/* Center: Search */}
           <div className="hidden md:flex flex-1 max-w-md mx-8 relative">
             <input
               type="text"
               placeholder="Search products..."
-              className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
             />
-            <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           </div>
 
-          {/* Right Icons */}
-          <div className="flex items-center space-x-4">
-            {!isLoggedIn ? (
-              <button
-                onClick={() => setIsLoginOpen(true)}
-                className="p-1 hover:text-green-600 transition-colors"
-              >
-                <User className="w-6 h-6 text-gray-700 cursor-pointer" />
-              </button>
-            ) : (
-              <div className="flex items-center space-x-3">
-               
+          {/* User dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => {
+                if (isLoggedIn) setShowDropdown(!showDropdown);
+                else setIsLoginOpen(true);
+              }}
+              className="flex items-center space-x-2 hover:text-green-600"
+            >
+              <User className="w-6 h-6 text-gray-700" />
+              {isLoggedIn && (
+                <div className="flex flex-col text-left">
+                  <span className="text-sm font-semibold text-green-700">{userName}</span>
+                  <span className="text-xs text-gray-500">{userEmail}</span>
+                </div>
+              )}
+            </button>
 
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-red-700 transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
+            {isLoggedIn && (
+              <AnimatePresence>
+                {showDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg border border-gray-100 p-3 z-50"
+                  >
+                    <div className="border-b border-gray-200 pb-2 mb-2">
+                      <p className="text-sm font-semibold text-green-700">{userName}</p>
+                      <p className="text-xs text-gray-500">{userEmail}</p>
+                    </div>
+
+                    <ul className="flex flex-col space-y-2 text-sm text-gray-700">
+                      <li
+                        onClick={() => { navigate("/userprofile"); setShowDropdown(false); }}
+                        className="flex items-center gap-2 hover:text-green-600 cursor-pointer"
+                      >
+                        <User className="w-4 h-4" /> My Account
+                      </li>
+                      <li
+                        onClick={() => { navigate("/cart"); setShowDropdown(false); }}
+                        className="flex items-center gap-2 hover:text-green-600 cursor-pointer"
+                      >
+                        <ShoppingCart className="w-4 h-4" /> My Cart
+                      </li>
+                      <li
+                        onClick={() => { navigate("/wishlist"); setShowDropdown(false); }}
+                        className="flex items-center gap-2 hover:text-green-600 cursor-pointer"
+                      >
+                        <Heart className="w-4 h-4" /> Wishlist
+                      </li>
+                      <li
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 text-red-600 hover:text-red-700 cursor-pointer"
+                      >
+                        <LogOut className="w-4 h-4" /> Logout
+                      </li>
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             )}
+          </div>
 
-            {/* Wishlist Icon */}
-            <Heart
-              className="w-6 h-6 text-gray-700 cursor-pointer hover:text-pink-600"
-              onClick={() => navigate("/wishlist")}
-            />
-
-            {/* Shopping Cart */}
-            <ShoppingCart
-              className="w-6 h-6 text-gray-700 cursor-pointer hover:text-green-600"
-              onClick={() => navigate("/cart")}
-            />
-
-            {/* Mobile Menu */}
+          {/* Mobile menu */}
+          <div className="flex items-center space-x-4 relative">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2 text-gray-700 hover:text-green-600 transition-colors"
@@ -163,14 +250,13 @@ const handleCategoryClick = (category: string) => {
           </div>
         </div>
 
-        {/* Categories (desktop) */}
+        {/* Desktop categories */}
         <div className="hidden md:flex justify-center space-x-8 py-3 text-gray-800 font-medium">
           {categories.map((cat) => (
             <button
               key={cat.name}
               onClick={() => handleCategoryClick(cat.name)}
-              className={`flex items-center space-x-2 hover:text-green-600 focus:outline-none ${selectedCategory === cat.name ? "text-green-600 font-bold" : ""
-                }`}
+              className={`flex items-center space-x-2 hover:text-green-600 focus:outline-none ${selectedCategory === cat.name ? "text-green-600 font-bold" : ""}`}
             >
               <img src={cat.icon} alt={cat.name} className="w-6 h-6 object-contain" />
               <span>{cat.name}</span>
@@ -178,7 +264,7 @@ const handleCategoryClick = (category: string) => {
           ))}
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile menu content */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
@@ -188,21 +274,25 @@ const handleCategoryClick = (category: string) => {
               className="md:hidden border-t border-gray-200 py-4"
             >
               <div className="flex flex-col space-y-4 px-4">
+                {/* Search input */}
                 <div className="relative">
                   <input
                     type="text"
                     placeholder="Search products..."
-                    className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearch}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400 transition-all"
                   />
-                  <Search className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 </div>
 
+                {/* Categories */}
                 {categories.map((cat) => (
                   <button
                     key={cat.name}
                     onClick={() => handleCategoryClick(cat.name)}
-                    className={`flex items-center space-x-2 text-gray-800 hover:text-green-600 focus:outline-none ${selectedCategory === cat.name ? "text-green-600 font-bold" : ""
-                      }`}
+                    className={`flex items-center space-x-2 text-gray-800 hover:text-green-600 focus:outline-none ${selectedCategory === cat.name ? "text-green-600 font-bold" : ""}`}
                   >
                     <img src={cat.icon} alt={cat.name} className="w-6 h-6 object-contain" />
                     <span>{cat.name}</span>
@@ -218,12 +308,12 @@ const handleCategoryClick = (category: string) => {
       <LoginSignup
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
-        setIsLoggedIn={(loggedIn: boolean, name?: string) => {
+        setIsLoggedIn={(loggedIn: boolean, name?: string, email?: string) => {
           setIsLoggedIn(loggedIn);
           if (loggedIn && name) setUserName(name);
+          if (loggedIn && email) setUserEmail(email);
         }}
       />
-
     </>
   );
 }

@@ -192,7 +192,7 @@ async toggleWishlist(productId: string, userId: string): Promise<{ wishlist: boo
 }
 
 // Check if product is wishlisted for the logged-in user
-async isProductWishlisted(productId: string): Promise<{ wishlisted: boolean }> {
+async isProductWishlisted(productId: string, id: string): Promise<{ wishlisted: boolean }> {
   try {
     const storedUser = localStorage.getItem("loggedInUser");
     if (!storedUser) throw new Error("User not logged in");

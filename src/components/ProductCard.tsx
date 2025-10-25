@@ -145,6 +145,54 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
     navigate(`/product/${product.id}`);
   };
 
+
+
+  // Add this function inside ProductCard
+const handleBuyNow = async (e: React.MouseEvent) => {
+  e.stopPropagation();
+  if (!product) return;
+  if (availableStock <= 0) {
+    alert("⚠️ Out of stock");
+    return;
+  }
+
+  const loggedUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+  if (!loggedUser?.id) {
+    alert("🔒 Please log in");
+    return;
+  }
+
+  const variantSizes = selectedVariant?.size ? JSON.parse(selectedVariant.size) : [];
+  const productSizes =
+    (!variantSizes.length && product?.variants?.[0]?.size)
+      ? JSON.parse(product.variants[0].size)
+      : [];
+  const selectedSize = variantSizes[0] || productSizes[0] || "";
+  const productColors = product.variants?.map(v => v.color).filter(Boolean) || [];
+  const selectedColor = selectedVariant?.color || productColors[0] || "Default";
+
+  const cartItem = {
+    id: crypto.randomUUID(),
+    product_id: product.id,
+    product_variant_id: selectedVariant?.id || null,
+    name: product.name,
+    image_url: displayedImages[selectedImageIndex] || displayedImages[0],
+    price: selectedVariant?.price || product.price,
+    quantity: 1,
+    color: selectedColor,
+    size: selectedSize,
+    variant_name: selectedVariant?.name || "",
+  };
+
+  try {
+    await addItem(cartItem as any);
+    navigate("/checkout"); // Go directly to checkout
+  } catch (err) {
+    console.error("Failed to buy now:", err);
+    alert("❌ Failed to process Buy Now. Refresh to try again.");
+  }
+};
+
   // Add to cart
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -266,18 +314,31 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
     {/* Quick Add Button (only hover on desktop) */}
     {!isMobile && (
-      <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleAddToCart}
-          disabled={availableStock <= 0}
-          className="w-full bg-pink-600 text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg font-medium flex items-center justify-center space-x-1 sm:space-x-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
-        >
-          <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span>{availableStock <= 0 ? "Out of Stock" : "Quick Add"}</span>
-        </motion.button>
-      </div>
+    <div className="absolute bottom-2 left-2 right-2 sm:bottom-3 sm:left-3 sm:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex justify-between space-x-2">
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={handleAddToCart}
+    disabled={availableStock <= 0}
+    className="bg-pink-600 text-white py-1.5 px-3 rounded-md font-medium flex items-center justify-center space-x-1 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm flex-1 mr-1"
+  >
+    <ShoppingCart className="w-4 h-4" />
+    <span>{availableStock <= 0 ? "Out of Stock" : "Quick Add"}</span>
+  </motion.button>
+
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={handleBuyNow}
+    disabled={availableStock <= 0}
+    className="bg-green-600 text-white py-1.5 px-3 rounded-md font-medium flex items-center justify-center shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-sm flex-1 ml-1"
+  >
+    <span>Buy Now</span>
+  </motion.button>
+</div>
+
+
+
     )}
   </div>
   {/* Reviews */}
@@ -335,17 +396,27 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
     {/* Quick Add button visible on mobile without hover */}
     {isMobile && (
-      <div className="mt-2">
-        <button
-          onClick={handleAddToCart}
-          disabled={availableStock <= 0}
-          className="w-full bg-pink-600 text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg font-medium flex items-center justify-center space-x-1 sm:space-x-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
-        >
-          <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          <span>{availableStock <= 0 ? "Out of Stock" : "Quick Add"}</span>
-        </button>
-      </div>
-    )}
+  <div className="mt-2 flex space-x-1 justify-center">
+    <button
+      onClick={handleAddToCart}
+      disabled={availableStock <= 0}
+      className="w-24 bg-pink-600 text-white py-1 px-2 rounded-md font-medium flex items-center justify-center space-x-1 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+    >
+      <ShoppingCart className="w-3 h-3" />
+      <span>{availableStock <= 0 ? "Out of Stock" : "Add"}</span>
+    </button>
+    <button
+      onClick={handleBuyNow}
+      disabled={availableStock <= 0}
+      className="w-20 bg-green-600 text-white py-1 px-2 rounded-md font-medium flex items-center justify-center space-x-1 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+    >
+      <span>Buy</span>
+    </button>
+  </div>
+)}
+
+
+
   </div>
 </motion.div>
 

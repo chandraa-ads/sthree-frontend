@@ -1,39 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
+// ===== Components & Pages =====
 import { Home } from "./components/home/HomePage.tsx";
-import Navbar from "./components/layout/Navbar"; // folder: layout, file: Navbar.tsx
-import { ProductDetail } from "./components/admin/ProductDetails"; // ProductDetails.tsx
-import { CartDrawer } from "./components/cart/CartDrawer"; // CartDrawer.tsx
-import LoginSignup from "./components/auth/LoginSignup"; // LoginSignup.tsx
-import AccountInfo from "./payment/AccountInfo"; // AccountInfo.tsx
-import UserProfile from "./components/home/UserProfile"; // UserProfile.tsx
-import AdminLogin from "./components/admin/AdminLogin"; // AdminLogin.tsx
-import ProductForm from "./components/products/ProductForm"; // ProductForm.tsx
-import CategoryPage from "./components/home/CategoryPage"; // CategoryPage.tsx
-import { WishlistPage } from "./components/WishlistPage"; // WishlistPage.tsx
-import ShoppingCart from "./components/cart/ShoppingCart"; // ShoppingCart.tsx
-import { Footer } from "./components/footer/FooterUser"; // FooterUser.tsx
+import Navbar from "./components/layout/Navbar";
+// import {ProductDetail} from "./components/home/ProductDetail.tsx";
+import { ProductDetail } from "./components/admin/ProductDetails.tsx";
+import { CartDrawer } from "./components/cart/CartDrawer";
+import LoginSignup from "./components/auth/LoginSignup";
+import AccountInfo from "./payment/AccountInfo";
+import UserProfile from "./components/home/UserProfile";
+import AdminLogin from "./components/admin/AdminLogin";
+import ProductForm from "./components/products/ProductForm";
+import CategoryPage from "./components/home/CategoryPage";
+import { WishlistPage } from "./components/WishlistPage";
+import ShoppingCart from "./components/cart/ShoppingCart";
+import { Footer } from "./components/footer/FooterUser";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
+import SearchResultsPage from "./components/home/SearchResultsPage";
+import Dashboard from "./components/admin/Dashboard";
+import OrdersTable from "./components/admin/status.tsx";
+import UsersTable from "./components/admin/user.tsx";
+import SizeChartPage from "./components/ui/SizeChart.tsx";
+import Checkout from "./payment/Checkout.tsx";
+
+// ===== Layout Component =====
+const Layout: React.FC<React.PropsWithChildren> = ({ children }) => {
+  return (
+  <div className="flex flex-col min-h-screen w-screen">
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Main content grows to fill the remaining viewport */}
+      <main className="flex-grow overflow-auto mt-[var(--navbar-height)]">
+        {children}
+      </main>
+
+      {/* Footer always at bottom */}
+      <Footer />
+
+      {/* Floating Cart Drawer */}
+      <CartDrawer />
+    </div>
+  );
+};
 
 
-
-const Layout: React.FC<React.PropsWithChildren> = ({ children }) => (
-  <div className="flex flex-col min-h-screen relative">
-    <Navbar />
-    <main className="flex-grow">{children}</main>
-    <Footer />
-    <CartDrawer />
-  </div>
-);
-
+// ===== Admin Auth Guard =====
 const RequireAdminAuth: React.FC<{ children: JSX.Element }> = ({ children }) => {
   const token = localStorage.getItem("adminToken");
   if (!token) return <Navigate to="/admin/login" replace />;
   return children;
 };
 
+// ===== Main App =====
 function App() {
   const [token, setToken] = useState<string | null>(localStorage.getItem("adminToken"));
 
@@ -52,6 +73,7 @@ function App() {
       <CartProvider>
         <Router>
           <Routes>
+            {/* ===== Public Routes ===== */}
             <Route
               path="/*"
               element={
@@ -63,26 +85,79 @@ function App() {
                     <Route path="/userprofile" element={<UserProfile />} />
                     <Route path="/category/:main_category" element={<CategoryPage />} />
                     <Route path="/login" element={<LoginSignup isOpen={false} onClose={() => {}} />} />
-                       <Route path="/wishlist" element={<WishlistPage />} />
-                       <Route path="/cart" element={<ShoppingCart />} /> 
+                    <Route path="/wishlist" element={<WishlistPage />} />
+                    <Route path="/cart" element={<ShoppingCart />} />
+                    <Route path="/search" element={<SearchResultsPage />} />
+                    <Route path="/size" element={<SizeChartPage />} />
+                    <Route path="/payment" element={<Checkout/>} />
+
 
                   </Routes>
                 </Layout>
+              }
+            />
+
+            {/* ===== Admin Routes ===== */}
+            <Route
+              path="/admin/login"
+              element={<AdminLogin onLoginSuccess={handleAdminLoginSuccess} />}
+            />
+
+            <Route
+              path="/admin/dashboard"
+              element={
+                <RequireAdminAuth>
+                  <Dashboard token={token} />
+                </RequireAdminAuth>
               }
             />
 
             <Route
-              path="/admin/*"
+              path="/admin/add-product"
               element={
-                <Layout>
-                  <Routes>
-                    <Route path="login" element={<AdminLogin onLoginSuccess={handleAdminLoginSuccess} />} />
-                    <Route path="product-form" element={<RequireAdminAuth><ProductForm token={token} /></RequireAdminAuth>} />
-                  </Routes>
-                </Layout>
+                <RequireAdminAuth>
+                  <ProductForm token={token} />
+                </RequireAdminAuth>
               }
             />
 
+            <Route
+              path="/admin/product-details"
+              element={
+                <RequireAdminAuth>
+                  <ProductDetail token={token} />
+                </RequireAdminAuth>
+              }
+            />
+
+            <Route
+              path="/admin/status"
+              element={
+                <RequireAdminAuth>
+                  <OrdersTable token={token} />
+                </RequireAdminAuth>
+              }
+            />
+
+            <Route
+              path="/admin/users"
+              element={
+                <RequireAdminAuth>
+                  <UsersTable token={token} />
+                </RequireAdminAuth>
+              }
+            />
+
+            <Route
+              path="/admin/reviews"
+              element={
+                <RequireAdminAuth>
+                  <ProductDetail token={token} />
+                </RequireAdminAuth>
+              }
+            />
+
+            {/* ===== Catch-All Route ===== */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
