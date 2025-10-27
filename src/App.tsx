@@ -24,6 +24,8 @@ import OrdersTable from "./components/admin/status.tsx";
 import UsersTable from "./components/admin/user.tsx";
 import SizeChartPage from "./components/ui/SizeChart.tsx";
 import Checkout from "./payment/Checkout.tsx";
+import ShippingInfo from "./components/footer/ShippingInfo.tsx";
+import Returns from "./components/footer/Returns.tsx";
 
 // ===== Layout Component =====
 const Layout: React.FC<React.PropsWithChildren> = ({ children }) => {
@@ -90,6 +92,8 @@ function App() {
                     <Route path="/search" element={<SearchResultsPage />} />
                     <Route path="/size" element={<SizeChartPage />} />
                     <Route path="/payment" element={<Checkout/>} />
+                    <Route path="/shipping-info" element={<ShippingInfo />} />
+                    <Route path="/returns" element={<Returns />} />
 
 
                   </Routes>

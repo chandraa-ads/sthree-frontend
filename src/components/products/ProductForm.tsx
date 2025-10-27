@@ -93,7 +93,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
     if (originalPrice !== "" && discountPercentage !== "") {
       const calculated = Math.round(
         Number(originalPrice) -
-          (Number(originalPrice) * Number(discountPercentage)) / 100
+        (Number(originalPrice) * Number(discountPercentage)) / 100
       );
       setPrice(calculated);
     }
@@ -181,7 +181,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
     if (originalPrice !== "" && discountPercentage !== "") {
       const calculated = Math.round(
         Number(originalPrice) -
-          (Number(originalPrice) * Number(discountPercentage)) / 100
+        (Number(originalPrice) * Number(discountPercentage)) / 100
       );
       setPrice(calculated);
     }
@@ -552,15 +552,36 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
 
         {/* Images */}
         <div>
-          <label>Product Images</label>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={onImagesChange}
-            className="w-full"
-          />
-          <div className="flex gap-4 mt-2 flex-wrap">
+          <label className="font-semibold text-lg block mb-2">
+            Product Images
+          </label>
+
+          {/* Drag & Drop Zone */}
+          <div
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const files = Array.from(e.dataTransfer.files);
+              const previews = files.map((file) => URL.createObjectURL(file));
+              setImages((prev) => [...prev, ...files]);
+              setImagePreviews((prev) => [...prev, ...previews]);
+            }}
+            className="border-2 border-dashed border-pink-400 p-6 rounded-lg text-center cursor-pointer hover:bg-pink-50 transition relative"
+          >
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={onImagesChange}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+            <p className="text-gray-600">
+              Drag & drop product images here, or <span className="text-pink-600 font-semibold">click to upload</span>
+            </p>
+          </div>
+
+          {/* Previews */}
+          <div className="flex gap-4 mt-4 flex-wrap">
             {/* Existing Images */}
             {existingImages.map((src, idx) => (
               <div key={"existing-" + idx} className="relative">
@@ -598,6 +619,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
             ))}
           </div>
         </div>
+
 
         {/* Variants */}
         <div>

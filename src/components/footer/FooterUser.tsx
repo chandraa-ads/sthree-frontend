@@ -18,7 +18,6 @@ export function Footer() {
   const navigate = useNavigate();
 
   const quickLinks = [
-    // { name: "Home", path: "/" },
     { name: "Sarees", path: "/category/saree" },
     { name: "Salwar", path: "/category/salwar" },
     { name: "Top & Kurtis", path: "/category/top & kurtis" },
@@ -30,13 +29,32 @@ export function Footer() {
     { name: "Size Guide", path: "/size" },
     { name: "Shipping Info", path: "/shipping-info" },
     { name: "Returns & Exchanges", path: "/returns" },
-
   ];
 
   const bottomLinks = [
     { name: "Privacy Policy", path: "/privacy-policy" },
     { name: "Terms of Service", path: "/terms" },
     { name: "Cookie Policy", path: "/cookie-policy" },
+  ];
+
+  // ✅ Add your social links here
+  const socialLinks = [
+    {
+      Icon: Facebook,
+      url: "https://www.facebook.com/profile.php?id=61582695366841",
+    },
+    {
+      Icon: Instagram,
+      url: "https://www.instagram.com/sthreetrendz2025/",
+    },
+    {
+      Icon: Twitter,
+      url: "https://x.com/sth_ree2025", // You can replace later
+    },
+    {
+      Icon: Youtube,
+      url: "https://youtube.com/@sthreetrendz06?si=WugT0Nxp9eojj7nS", // You can replace later
+    },
   ];
 
   return (
@@ -47,7 +65,6 @@ export function Footer() {
 
           {/* ===== Brand Section ===== */}
           <div className="flex flex-col space-y-6 flex-1">
-            {/* Logo + Name */}
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center">
               <img src={SthLogo} alt="SthRee" className="h-10 w-auto" />
               <span className="ml-2 text-xl font-bold transition-colors duration-300 hover:text-pink-600">
@@ -55,26 +72,25 @@ export function Footer() {
               </span>
             </motion.div>
 
-            {/* Description */}
             <p className="text-gray-400 text-[15px] leading-relaxed">
               Discover the finest collection of traditional and contemporary sarees.
               Crafted with love, delivered with care.
             </p>
 
-            {/* Social Icons */}
+            {/* ✅ Social Icons with links */}
             <div className="flex space-x-5 pt-2">
-              {[{ Icon: Facebook }, { Icon: Twitter }, { Icon: Instagram }, { Icon: Youtube }].map(
-                ({ Icon }, idx) => (
-                  <motion.a
-                    key={idx}
-                    whileHover={{ scale: 1.1 }}
-                    href="#"
-                    className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors"
-                  >
-                    <Icon className="w-4 h-4" />
-                  </motion.a>
-                )
-              )}
+              {socialLinks.map(({ Icon, url }, idx) => (
+                <motion.a
+                  key={idx}
+                  whileHover={{ scale: 1.1 }}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-pink-600 transition-colors"
+                >
+                  <Icon className="w-4 h-4" />
+                </motion.a>
+              ))}
             </div>
           </div>
 
@@ -120,7 +136,6 @@ export function Footer() {
             </ul>
           </div>
 
-
           {/* ===== Contact Info ===== */}
           <div className="flex flex-col space-y-3 flex-1">
             <h3 className="text-lg font-semibold mb-4">Get in Touch</h3>
@@ -152,16 +167,15 @@ export function Footer() {
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-pink-500 flex-shrink-0" />
                 <a
-                  href="mailto:sujangnanaolivu@gmail.com"
+                  href="mailto:sthreetrendz2025@gmail.com"
                   className="text-gray-400 text-sm hover:underline"
                 >
-                  sujangnanaolivu@gmail.com
+                  sthreetrendz2025@gmail.com
                 </a>
               </div>
             </div>
           </div>
         </div>
-
 
         {/* ===== Bottom Section ===== */}
         <div className="border-t border-gray-800 mt-12 pt-8">
