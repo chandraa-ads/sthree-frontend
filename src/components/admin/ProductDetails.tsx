@@ -10,6 +10,7 @@ import { ShareModal } from "../ShareModal";
 import { useCart, CartItem } from "../../contexts/CartContext";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { Heart } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 interface UserRating {
   id: string;
@@ -299,6 +300,16 @@ export function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-white">
+       <Helmet>
+        <title>{`${product.name} | SthRee Collections`}</title>
+        <meta name="description" content={product.description.slice(0, 150)} />
+        <meta property="og:title" content={product.name} />
+        <meta property="og:description" content={product.description.slice(0, 150)} />
+        <meta property="og:image" content={product.images?.[0]} />
+        <meta property="og:url" content={`https://sthree.com/product/${product.id}`} />
+        <meta name="keywords" content={`${product.name}, ${product.category}, sthree`} />
+      </Helmet>
+
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 py-4">
         <nav className="flex items-center space-x-2 text-sm text-gray-600">
@@ -356,7 +367,7 @@ export function ProductDetail() {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold">
-              {product.name} <span className="text-base text-gray-600 font-normal">({product.brand})</span>
+              {product.name} 
             </h1>
 
             <div className="flex items-center space-x-1 text-xs">

@@ -12,6 +12,7 @@ import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { Hero } from './Hero';
 import { FeaturedProducts } from './FeaturedProducts';
 import { Categories } from './Categories';
+import { Helmet } from 'react-helmet-async';
 
 interface FilterState {
   category: string;
@@ -152,7 +153,21 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-
+ <Helmet>
+        <title>Home | SthRee Collections</title>
+        <meta
+          name="description"
+          content="Discover premium sarees, salwars, kurtis, kids wear, and more at SthRee. Handcrafted designs with love. Free shipping and easy returns!"
+        />
+        <meta name="keywords" content="saree, salwar, kurthi, ethnic wear, sthree fashion" />
+        <meta property="og:title" content="SthRee Collections" />
+        <meta
+          property="og:description"
+          content="Shop exclusive ethnic wear for all occasions. Beautiful designs, authentic quality, and affordable prices."
+        />
+        <meta property="og:image" content="/assets/og-image-home.jpg" />
+        <link rel="canonical" href="https://sthree.com/" />
+      </Helmet>
       {/* Hero and Categories */}
       <Hero />
       <Categories />
@@ -160,33 +175,31 @@ export function Home() {
 
       {/* Search & Filters (Fixed) */}
       {(searchQuery || showAllProducts || Object.values(filters).some(f => f !== 'All' && f !== 0 && f !== 25000)) && (
-        <div className="flex flex-col lg:flex-row px-4 sm:px-6 lg:px-8 gap-4">
+        <div className="flex flex-col lg:flex-row px-4 sm:px-6 lg:px-8 gap-6 flex-1 min-h-[calc(100vh-120px)]">
           {/* Filters Sidebar */}
           <FilterSidebar
-  isOpen={isFilterOpen}
-  onClose={handleCloseFilters}
-  filters={filters}
-  onFilterChange={setFilters}
-  categories={categories}
-  brands={brands}
-  colors={colors}
-  className="lg:sticky lg:top-[120px] lg:h-[calc(100vh-120px)] overflow-y-auto"
-/>
+            isOpen={isFilterOpen}
+            onClose={handleCloseFilters}
+            filters={filters}
+            onFilterChange={setFilters}
+            categories={categories}
+            brands={brands}
+            colors={colors}
+            className="lg:w-1/4 lg:sticky lg:top-0 lg:h-[calc(100vh-100px)] border-r border-gray-100 overflow-y-auto"
+          />
 
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col overflow-hidden">
             {/* Sticky Search & Sort */}
             {isSearchVisible && (
-              <div className="sticky top-24 lg:top-[120px] z-50 bg-white/95 backdrop-blur-sm shadow px-4 py-2">
-                <div className="flex flex-col sm:flex-row gap-2 mb-2 items-center">
+              <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm px-4 py-3">
+                <div className="flex flex-wrap items-center gap-3">
                   {/* Sort Dropdown */}
-                  <div className="flex-shrink-0">
-                    <SortDropdown value={sortBy} onChange={setSortBy} />
-                  </div>
+                  <SortDropdown value={sortBy} onChange={setSortBy} />
 
                   {/* Search Bar */}
-                  <div className="flex-1 relative">
+                  <div className="flex-1 relative min-w-[200px]">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
                       type="text"
@@ -205,24 +218,21 @@ export function Home() {
                     <Filter className="w-5 h-5" />
                     <span>Filters</span>
                   </button>
-                </div>
 
-                {/* Results Count */}
-                <p className="text-gray-600 mt-1">{filteredProducts.length} products found</p>
+                  {/* Results Count */}
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    {filteredProducts.length} products found
+                  </span>
+                </div>
               </div>
             )}
 
-
-
-
-
             {/* Products Grid (Scrollable) */}
-            <div className="flex-1 overflow-y-auto mt-2 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {isSearching
-                ? [...Array(10)].map((_, index) => <ProductCardSkeleton key={index} />)
-                : filteredProducts.map((product, index) => (
-                  <ProductCard key={product.id} product={product} index={index} />
-                ))}
+            <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">              {isSearching
+              ? [...Array(10)].map((_, index) => <ProductCardSkeleton key={index} />)
+              : filteredProducts.map((product, index) => (
+                <ProductCard key={product.id} product={product} index={index} />
+              ))}
             </div>
 
             {filteredProducts.length === 0 && !isSearching && (
@@ -234,6 +244,7 @@ export function Home() {
             )}
           </div>
         </div>
+
       )}
 
       {/* Show All Products Button */}

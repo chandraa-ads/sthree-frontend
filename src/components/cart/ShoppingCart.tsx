@@ -2,6 +2,8 @@ import React from "react";
 import { useCart } from "../../contexts/CartContext";
 import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
+import { useParams } from "react-router-dom";
 
 const ShoppingCart: React.FC = () => {
   const { cartItems, updateCartItem, removeItem } = useCart();
@@ -12,9 +14,20 @@ const ShoppingCart: React.FC = () => {
   );
   const deliveryFee = cartItems.length > 0 ? 50 : 0;
   const totalAmount = subtotal + deliveryFee;
-
+  const { main_category } = useParams();
+  const formatted = main_category?.replace(/-/g, " ") || "Category";
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
+      <Helmet>
+        <title>{`${formatted} Collection | SthRee Collections`}</title>
+        <meta
+          name="description"
+          content={`Explore SthRee’s exclusive ${formatted} collection. Premium fabrics, unique designs, and unbeatable prices.`}
+        />
+        <meta property="og:title" content={`${formatted} - SthRee`} />
+        <meta property="og:image" content={`/assets/category/${main_category}.jpg`} />
+        <link rel="canonical" href={`https://sthree.com/category/${main_category}`} />
+      </Helmet>
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* LEFT SIDE - CART ITEMS */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-md p-6">

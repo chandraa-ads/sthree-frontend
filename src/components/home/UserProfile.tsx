@@ -116,39 +116,54 @@ useEffect(() => {
     }
   };
 
-  const handleSave = async () => {
-    if (!userId) return alert("User not logged in!");
+const handleSave = async () => {
+  if (!userId) return alert("User not logged in!");
 
-    try {
-      const formData = new FormData();
-      formData.append("userId", userId);
-      formData.append("full_name", editUser.name || "");
-      formData.append("phone", editUser.phone || "");
-      formData.append("whatsapp_no", editUser.whatsapp || "");
-      if (editUser.address) {
-        const addresses = editUser.address.split(",").map((a) => a.trim());
-        addresses.forEach((addr) => formData.append("addresses", addr));
-      }
-      if (photoFile) formData.append("profile_photo", photoFile);
+  try {
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("full_name", editUser.name || "");
+    formData.append("phone", editUser.phone || "");
+    formData.append("whatsapp_no", editUser.whatsapp || "");
 
-      const res = await fetch("http://localhost:3000/users/update-profile", {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update profile");
-
-      setUser(editUser); // Update frontend only after save
-      if (data.profile?.profile_photo) setPhoto(data.profile.profile_photo);
-      setIsModalOpen(false);
-      alert("Profile updated successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update profile. Try again.");
+    // ✅ Date of Birth
+    if (editUser.dob) {
+      formData.append("dob", editUser.dob); // format: YYYY-MM-DD
     }
-  };
+
+    // ✅ Gender
+    if (editUser.gender) {
+      formData.append("gender", editUser.gender);
+    }
+
+    // ✅ Addresses (multiple or comma-separated)
+    if (editUser.address) {
+      const addresses = editUser.address.split(",").map((a) => a.trim());
+      addresses.forEach((addr) => formData.append("addresses", addr));
+    }
+
+    // ✅ Profile Photo
+    if (photoFile) formData.append("profile_photo", photoFile);
+
+    const res = await fetch("http://localhost:3000/users/update-profile", {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to update profile");
+
+    setUser(editUser);
+    if (data.profile?.profile_photo) setPhoto(data.profile.profile_photo);
+    setIsModalOpen(false);
+    alert("Profile updated successfully!");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to update profile. Try again.");
+  }
+};
+
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-pink-50 to-white flex flex-col md:flex-row overflow-hidden">

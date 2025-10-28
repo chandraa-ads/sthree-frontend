@@ -362,7 +362,6 @@ const handleBuyNow = async (e: React.MouseEvent) => {
       <h3 className="font-semibold text-gray-900 line-clamp-2 mb-0.5 sm:mb-1 text-sm sm:text-base">
         {product.name}
       </h3>
-      <p className="text-[11px] sm:text-sm text-gray-600">{product.brand}</p>
     </div>
 
     {/* Price & Stock */}
