@@ -95,6 +95,7 @@ const Returns: React.FC = () => {
               <p className="text-gray-600 text-sm">{desc}</p>
             </motion.div>
           ))}
+          
         </div>
 
         {/* ===== RETURN POLICY DETAILS ===== */}
@@ -113,7 +114,7 @@ const Returns: React.FC = () => {
               You can return or exchange products within 7 days of delivery if they are unused, unwashed, and in original condition.
             </li>
             <li>
-              Items with visible wear, perfume scent, stains, or damages will not be accepted.
+              Items with visible wear, perfume , stains , or damages will not be accepted.
             </li>
             <li>
               Returns are not applicable on accessories, discounted items, or custom-stitched pieces.

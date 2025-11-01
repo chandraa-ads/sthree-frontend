@@ -1,13 +1,13 @@
 import React from "react";
 import { motion } from "framer-motion";
-import silkSareeImg from "../../assets/landing_img/set topssalwar.jpg";
-import cottonSareeImg from "../../assets/landing_img/80f175fb3a268fc594148204ce134d8a.jpg";
-import designerSareeImg from "../../assets/landing_img/Blue Crepe Satin.jpg";
-import partyWear1 from "../../assets/landing_img/c67d2c0f89eb944d58fc9fef062ece06.jpg";
-import partyWear2 from "../../assets/landing_img/Chiffon Lace Border Work Saree.jpg";
-import partyWear3 from "../../assets/landing_img/kurtis sandal.jpg";
-import partyWear4 from "../../assets/landing_img/New pure chanderi batik saree with designer blouse..jpg";
-import partyWear5 from "../../assets/landing_img/Peach checked linen saree.jpg";
+import silkSareeImg from "../../assets/landing_img/set topssalwar.webp";
+import cottonSareeImg from "../../assets/landing_img/80f175fb3a268fc594148204ce134d8a.webp";
+import designerSareeImg from "../../assets/landing_img/Blue Crepe Satin.webp";
+import partyWear1 from "../../assets/landing_img/c67d2c0f89eb944d58fc9fef062ece06.webp";
+import partyWear2 from "../../assets/landing_img/Chiffon Lace Border Work Saree.webp";
+import partyWear3 from "../../assets/landing_img/kurtis sandal.webp";
+import partyWear4 from "../../assets/landing_img/New pure chanderi batik saree with designer blouse..webp";
+import partyWear5 from "../../assets/landing_img/Peach checked linen saree.webp";
 
 const categories = [
   { id: 1, name: "Silk Sarees", image: silkSareeImg },

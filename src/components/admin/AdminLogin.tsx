@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // ✅ import
-import bgImg from '../../assets/icon/admin.png';
-import logo from '../../assets/icon/sth_ree.svg';
+import bgImg from '../../assets/webpicon/admin.webp';
+import logo from '../../assets/webpicon/sth_ree.webp';
 
 interface AdminLoginProps {
   onLoginSuccess: (token: string) => void;

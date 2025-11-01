@@ -15,17 +15,43 @@ interface ProductFormProps {
 }
 
 const sizeOptions = [
-  "Free",
-  "M",
-  "S",
-  "XL",
-  "XS",
-  "L",
-  "2XL",
-  "3XL",
-  "4XL",
-  "5XL",
+  // 🧍 Adult sizes
+  "Free | Universal",
+  "XS | 34",
+  "S | 36",
+  "M | 38",
+  "L | 40",
+  "XL | 42",
+  "2XL | 44",
+  "3XL | 46",
+  "4XL | 48",
+  "5XL | 50",
+
+  // 👶 Baby sizes
+  "0-3 M | Baby",
+  "3-6 M | Baby",
+  "6-9 M | Baby",
+  "9-12 M | Baby",
+  "12-18 M | Baby",
+  "18-24 M | Baby",
+  "2-3 Y | Baby",
+  "3-4 Y | Baby",
+  "4-5 Y | Baby",
+
+  // 🧒 Kids sizes
+  "5-6 Y | Kids",
+  "6-7 Y | Kids",
+  "7-8 Y | Kids",
+  "8-9 Y | Kids",
+  "9-10 Y | Kids",
+  "10-11 Y | Kids",
+  "11-12 Y | Kids",
+  "12-13 Y | Kids",
+  "13-14 Y | Kids",
+  "14-15 Y | Kids",
 ];
+
+
 
 const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
   const [name, setName] = useState(product?.name || "");
@@ -48,9 +74,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
   const [aboutItem, setAboutItem] = useState(product?.about_item || "");
   const [description, setDescription] = useState(product?.description || "");
 
-  // ✅ Product Detail as JSON
-  const [productDetail, setProductDetail] = useState<Record<string, any>>({});
-  const [productDetailRaw, setProductDetailRaw] = useState<string>("");
+  // Product Detail as key–value pairs
+  const [productDetail, setProductDetail] = useState<{ key: string; value: string }[]>([]);
+  const [productDetailRaw, setProductDetailRaw] = useState("{}");
+
 
   const [existingImages, setExistingImages] = useState<string[]>(
     product?.images || []
@@ -61,7 +88,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
   // Add this useEffect inside your ProductForm component
   useEffect(() => {
     // If category is empty or equals previous mainCategory, update it automatically
-    setCategory((prevCategory) => {
+    setCategory((prevCategory: any) => {
       // Only update if category is empty or previously equal to mainCategory
       if (!prevCategory || prevCategory === product?.main_category) {
         return mainCategory;
@@ -77,17 +104,22 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
           typeof product.product_detail === "string"
             ? JSON.parse(product.product_detail)
             : product.product_detail;
-        setProductDetail(parsed || {});
-        setProductDetailRaw(JSON.stringify(parsed || {}, null, 2));
+        const keyValues = Object.entries(parsed).map(([key, value]) => ({
+          key,
+          value: String(value),
+        }));
+        setProductDetail(keyValues);
+        setProductDetailRaw(JSON.stringify(parsed, null, 2));
       } catch {
-        setProductDetail({});
+        setProductDetail([]);
         setProductDetailRaw("{}");
       }
     } else {
-      setProductDetail({});
+      setProductDetail([]);
       setProductDetailRaw("{}");
     }
   }, [product]);
+
 
   useEffect(() => {
     if (originalPrice !== "" && discountPercentage !== "") {
@@ -151,7 +183,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
     setBrand("");
     setAboutItem("");
     setDescription("");
-    setProductDetail({});
+    setProductDetail([]);
+    setProductDetailRaw("{}");
     setProductSize([]);
     setDiscountStartDate("");
     setDiscountEndDate("");
@@ -161,6 +194,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
     setTaxPercentage(18);
     setImages([]);
     setImagePreviews([]);
+    setExistingImages([]);
     setVariants([
       {
         color: "",
@@ -193,14 +227,64 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
     };
   }, [imagePreviews]);
 
-  const onImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const previews = files.map((file) => URL.createObjectURL(file));
-      setImages((prev) => [...prev, ...files]); // add new files
-      setImagePreviews((prev) => [...prev, ...previews]); // add new previews
-    }
+  // Utility: Convert file to WebP
+  const convertToWebP = async (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.src = e.target?.result as string;
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject("Canvas not supported");
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return reject("WebP conversion failed");
+            const webpFile = new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), {
+              type: "image/webp",
+            });
+            resolve(webpFile);
+          },
+          "image/webp",
+          0.8 // quality (0–1)
+        );
+      };
+
+      img.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
   };
+
+  // Handle image selection
+  const onImagesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const convertedFiles = await Promise.all(files.map((file) => convertToWebP(file)));
+
+    const previews = convertedFiles.map((file) => URL.createObjectURL(file));
+    setImages((prev) => [...prev, ...convertedFiles]);
+    setImagePreviews((prev) => [...prev, ...previews]);
+  };
+
+  // Handle drag & drop upload
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    const convertedFiles = await Promise.all(files.map((file) => convertToWebP(file)));
+
+    const previews = convertedFiles.map((file) => URL.createObjectURL(file));
+    setImages((prev) => [...prev, ...convertedFiles]);
+    setImagePreviews((prev) => [...prev, ...previews]);
+  };
+
 
   const updateVariant = (index: number, field: keyof Variant, value: any) => {
     setVariants((prev) =>
@@ -268,7 +352,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
     formData.append("description", description);
 
     // ✅ Stringify productDetail for jsonb storage
-    formData.append("product_detail", JSON.stringify(productDetail));
+    formData.append(
+      "product_detail",
+      JSON.stringify(Object.fromEntries(productDetail.map(i => [i.key, i.value])))
+    );
 
     formData.append("product_size", JSON.stringify(productSize));
     formData.append("discount_start_date", discountStartDate);
@@ -460,24 +547,67 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
 
         {/* Product Detail */}
         <div>
-          <label className="font-semibold">Product Detail (JSON)</label>
-          <textarea
-            value={productDetailRaw}
-            onChange={(e) => {
-              setProductDetailRaw(e.target.value);
-              try {
-                setProductDetail(JSON.parse(e.target.value));
-              } catch {
-                // Ignore invalid JSON while typing
-              }
-            }}
-            className="w-full border p-2 rounded"
-            rows={6}
-          ></textarea>
-          <p className="text-sm text-gray-500">
-            Example: {"{"}"material":"Leather","warranty":"1 year"{"}"}
+          <label className="font-semibold">Product Details</label>
+
+          {productDetail.map((item, index) => (
+            <div key={index} className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                placeholder="Key (e.g., material)"
+                value={item.key}
+                onChange={(e) => {
+                  const updated = [...productDetail];
+                  updated[index].key = e.target.value;
+                  setProductDetail(updated);
+                  setProductDetailRaw(
+                    JSON.stringify(Object.fromEntries(updated.map(i => [i.key, i.value])))
+                  );
+                }}
+                className="border p-2 rounded w-1/2"
+              />
+              <input
+                type="text"
+                placeholder="Value (e.g., Leather)"
+                value={item.value}
+                onChange={(e) => {
+                  const updated = [...productDetail];
+                  updated[index].value = e.target.value;
+                  setProductDetail(updated);
+                  setProductDetailRaw(
+                    JSON.stringify(Object.fromEntries(updated.map(i => [i.key, i.value])))
+                  );
+                }}
+                className="border p-2 rounded w-1/2"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = productDetail.filter((_, i) => i !== index);
+                  setProductDetail(updated);
+                  setProductDetailRaw(
+                    JSON.stringify(Object.fromEntries(updated.map(i => [i.key, i.value])))
+                  );
+                }}
+                className="text-red-600 font-bold px-2"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => setProductDetail([...productDetail, { key: "", value: "" }])}
+            className="mt-2 px-3 py-1 bg-pink-500 text-white rounded"
+          >
+            + Add Detail
+          </button>
+
+          <p className="text-sm text-gray-500 mt-2">
+            Example: Material – Leather, Warranty – 1 year
           </p>
         </div>
+
 
         {/* Product Sizes */}
         <div>
@@ -559,13 +689,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
           {/* Drag & Drop Zone */}
           <div
             onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              e.preventDefault();
-              const files = Array.from(e.dataTransfer.files);
-              const previews = files.map((file) => URL.createObjectURL(file));
-              setImages((prev) => [...prev, ...files]);
-              setImagePreviews((prev) => [...prev, ...previews]);
-            }}
+            onDrop={handleDrop}
             className="border-2 border-dashed border-pink-400 p-6 rounded-lg text-center cursor-pointer hover:bg-pink-50 transition relative"
           >
             <input
@@ -576,9 +700,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
               className="absolute inset-0 opacity-0 cursor-pointer"
             />
             <p className="text-gray-600">
-              Drag & drop product images here, or <span className="text-pink-600 font-semibold">click to upload</span>
+              Drag & drop product images here, or{" "}
+              <span className="text-pink-600 font-semibold">click to upload</span>
             </p>
           </div>
+
 
           {/* Previews */}
           <div className="flex gap-4 mt-4 flex-wrap">
@@ -762,16 +888,24 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
             Add Variant
           </button>
         </div>
-
-        {/* Submit */}
-        <div>
+        {/* Submit & Reset */}
+        <div className="flex flex-col md:flex-row gap-4">
           <button
             type="submit"
-            className="w-full bg-pink-600 text-white px-6 py-3 rounded hover:bg-pink-700"
+            className="flex-1 bg-pink-600 text-white px-6 py-3 rounded hover:bg-pink-700"
           >
             {product ? "Update Product" : "Create Product"}
           </button>
+
+          <button
+            type="button"
+            onClick={resetForm}
+            className="flex-1 bg-gray-300 text-gray-800 px-6 py-3 rounded hover:bg-gray-400"
+          >
+            Reset Form
+          </button>
         </div>
+
       </form>
     </div>
   );

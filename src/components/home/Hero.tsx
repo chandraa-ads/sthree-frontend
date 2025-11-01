@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import banner1 from "../../assets/icon/front_1.jpg";
-import banner2 from "../../assets/icon/front_2.jpg";
-import banner3 from "../../assets/icon/front_6.png";
-import banner4 from "../../assets/icon/front_7.png";
+import banner1 from "../../assets/webpicon/front_1.webp";
+import banner2 from "../../assets/webpicon/front_2.webp";
+import banner3 from "../../assets/webpicon/front_6.webp";
+import banner4 from "../../assets/webpicon/front_7.webp";
 
 const images = [banner3, banner2, banner1, banner4];
 

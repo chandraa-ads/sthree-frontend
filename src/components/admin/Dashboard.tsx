@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import logo from "../../assets/icon/home.svg";
+import logo from "../../assets/webpicon/home.webp";
 
 interface DashboardStats {
   total_orders: number;
@@ -41,6 +41,7 @@ const Dashboard: React.FC = () => {
     { title: "STATUS", path: "/admin/status" },
     { title: "USERS", path: "/admin/users" },
     { title: "PRODUCT REVIEWS", path: "/admin/reviews" },
+
   ];
 
   return (

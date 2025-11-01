@@ -5,15 +5,15 @@ import { useNavigate, useLocation } from "react-router-dom";
 import LoginSignup from "../auth/LoginSignup";
 import { productService } from "../products/ProductService";
 
-import logoImg from "../../assets/icon/sth_ree.svg";
-import sareeIcon from "../../assets/icon/Saree.png";
-import salwarIcon from "../../assets/icon/salwar.png";
-import kuruthaIcon from "../../assets/icon/kurutha.png";
-import kidsIcon from "../../assets/icon/kids.png";
-import homeIcon from "../../assets/icon/home.png";
-import dupattaIcon from "../../assets/icon/dupatta.png";
-import accessoriesIcon from "../../assets/icon/accessories.png";
-import mens from "../../assets/icon/mens.png";
+import logoImg from "../../assets/webpicon/sth_ree.webp";
+import sareeIcon from "../../assets/webpicon/Saree.webp";
+import salwarIcon from "../../assets/webpicon/salwar.webp";
+import kuruthaIcon from "../../assets/webpicon/kurutha.webp";
+import kidsIcon from "../../assets/webpicon/kids.webp";
+import homeIcon from "../../assets/webpicon/home.webp";
+import dupattaIcon from "../../assets/webpicon/dupatta.webp";
+import accessoriesIcon from "../../assets/webpicon/accessories.webp";
+import mens from "../../assets/webpicon/mens.webp";
 import { ProductCard } from "../ProductCard";
 
 export default function Navbar() {
@@ -36,6 +36,7 @@ export default function Navbar() {
     { name: "SALWAR", icon: salwarIcon },
     { name: "TOP & KURTHI", icon: kuruthaIcon },
     { name: "KIDS WEAR", icon: kidsIcon },
+    { name: "NEW BORN ", icon: kidsIcon },
     { name: "HOME WEAR", icon: homeIcon },
     { name: "DUPATTA", icon: dupattaIcon },
     { name: "ACCESSORIES", icon: accessoriesIcon },

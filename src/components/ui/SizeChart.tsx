@@ -1,9 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import size1 from "../../assets/size/1.png";
-import size2 from "../../assets/size/2.png";
-import size3 from "../../assets/size/3.png";
-import size4 from "../../assets/size/4.png";
+import size1 from "../../assets/size/1.webp";
+import size2 from "../../assets/size/2.webp";
+import size3 from "../../assets/size/3.webp";
+import size4 from "../../assets/size/4.webp";
 
 export default function SizeChartZigZagAnimation() {
   const images = [size1, size2, size3, size4];

@@ -8,7 +8,6 @@ import Navbar from "./components/layout/Navbar";
 import { ProductDetail } from "./components/admin/ProductDetails.tsx";
 import { CartDrawer } from "./components/cart/CartDrawer";
 import LoginSignup from "./components/auth/LoginSignup";
-import AccountInfo from "./payment/AccountInfo";
 import UserProfile from "./components/home/UserProfile";
 import AdminLogin from "./components/admin/AdminLogin";
 import ProductForm from "./components/products/ProductForm";
@@ -20,12 +19,13 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import SearchResultsPage from "./components/home/SearchResultsPage";
 import Dashboard from "./components/admin/Dashboard";
-import OrdersTable from "./components/admin/status.tsx";
 import UsersTable from "./components/admin/user.tsx";
 import SizeChartPage from "./components/ui/SizeChart.tsx";
 import Checkout from "./payment/Checkout.tsx";
 import ShippingInfo from "./components/footer/ShippingInfo.tsx";
 import Returns from "./components/footer/Returns.tsx";
+import OrderTracking from "./payment/OrderTracking.tsx";
+import AdminOrders from "./components/admin/AdminOrders.tsx";
 
 // ===== Layout Component =====
 const Layout: React.FC<React.PropsWithChildren> = ({ children }) => {
@@ -83,7 +83,6 @@ function App() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
-                    <Route path="/accountinfo" element={<AccountInfo />} />
                     <Route path="/userprofile" element={<UserProfile />} />
                     <Route path="/category/:main_category" element={<CategoryPage />} />
                     <Route path="/login" element={<LoginSignup isOpen={false} onClose={() => {}} />} />
@@ -91,7 +90,7 @@ function App() {
                     <Route path="/cart" element={<ShoppingCart />} />
                     <Route path="/search" element={<SearchResultsPage />} />
                     <Route path="/size" element={<SizeChartPage />} />
-                    <Route path="/payment" element={<Checkout/>} />
+                    <Route path="/checkout" element={<Checkout/>} />
                     <Route path="/shipping-info" element={<ShippingInfo />} />
                     <Route path="/returns" element={<Returns />} />
 
@@ -138,7 +137,7 @@ function App() {
               path="/admin/status"
               element={
                 <RequireAdminAuth>
-                  <OrdersTable token={token} />
+                  <AdminOrders token={token} />
                 </RequireAdminAuth>
               }
             />
@@ -160,6 +159,7 @@ function App() {
                 </RequireAdminAuth>
               }
             />
+            
 
             {/* ===== Catch-All Route ===== */}
             <Route path="*" element={<Navigate to="/" replace />} />

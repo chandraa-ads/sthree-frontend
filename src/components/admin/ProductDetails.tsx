@@ -300,7 +300,7 @@ export function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-white">
-       <Helmet>
+      <Helmet>
         <title>{`${product.name} | SthRee Collections`}</title>
         <meta name="description" content={product.description.slice(0, 150)} />
         <meta property="og:title" content={product.name} />
@@ -367,7 +367,7 @@ export function ProductDetail() {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold">
-              {product.name} 
+              {product.name}
             </h1>
 
             <div className="flex items-center space-x-1 text-xs">
@@ -431,7 +431,60 @@ export function ProductDetail() {
 
             {/* Size Column */}
             {(() => {
-              const allSizes = ["Free","XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL", "5XL"];
+              const adultSizes = [
+                "Free | Universal",
+                "XS | 34",
+                "S | 36",
+                "M | 38",
+                "L | 40",
+                "XL | 42",
+                "2XL | 44",
+                "3XL | 46",
+                "4XL | 48",
+                "5XL | 50",
+              ];
+
+              const babySizes = [
+                "0-3 M | Baby",
+                "3-6 M | Baby",
+                "6-9 M | Baby",
+                "9-12 M | Baby",
+                "12-18 M | Baby",
+                "18-24 M | Baby",
+                "2-3 Y | Baby",
+                "3-4 Y | Baby",
+                "4-5 Y | Baby",
+              ];
+
+              const kidsSizes = [
+                "5-6 Y | Kids",
+                "6-7 Y | Kids",
+                "7-8 Y | Kids",
+                "8-9 Y | Kids",
+                "9-10 Y | Kids",
+                "10-11 Y | Kids",
+                "11-12 Y | Kids",
+                "12-13 Y | Kids",
+                "13-14 Y | Kids",
+                "14-15 Y | Kids",
+              ];
+
+              let allSizes: string[] = [];
+
+              // Category-based size logic
+              if (product.main_category?.toLowerCase() === "saree") {
+                allSizes = ["Free | Universal"];
+              } else if (product.main_category?.toLowerCase() === "kids") {
+                allSizes = [...babySizes, ...kidsSizes];
+              } else if (
+                product.main_category?.toLowerCase() === "new born" ||
+                product.main_category?.toLowerCase() === "baby"
+              ) {
+                allSizes = [...babySizes];
+              } else {
+                allSizes = [...adultSizes];
+              }
+
               const availableSizes = getAvailableSizes();
 
               return (
@@ -439,7 +492,11 @@ export function ProductDetail() {
                   <h3 className="font-semibold mb-1">Size</h3>
                   <div className="flex flex-row flex-wrap gap-2">
                     {allSizes.map((size) => {
-                      const isAvailable = availableSizes.includes(size);
+                      // ✅ Partial match check (case-insensitive)
+                      const isAvailable = availableSizes.some((s) =>
+                        s.toLowerCase().includes(size.split("|")[0].trim().toLowerCase())
+                      );
+
                       return (
                         <button
                           key={size}
@@ -448,8 +505,12 @@ export function ProductDetail() {
                           className={`px-3 py-1.5 border rounded-lg text-sm transition 
                 ${selectedSize === size
                               ? "border-pink-600 bg-pink-50 text-pink-700"
-                              : "border-gray-300"} 
-                ${!isAvailable ? "opacity-50 cursor-not-allowed bg-gray-100" : "hover:border-pink-400"}`}
+                              : "border-gray-300"
+                            } 
+                ${!isAvailable
+                              ? "opacity-50 cursor-not-allowed bg-gray-100"
+                              : "hover:border-pink-400"
+                            }`}
                         >
                           {size}
                         </button>
@@ -459,6 +520,9 @@ export function ProductDetail() {
                 </div>
               );
             })()}
+
+
+
 
           </div>
 

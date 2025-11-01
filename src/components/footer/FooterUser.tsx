@@ -10,8 +10,8 @@ import {
   Instagram,
   Youtube,
 } from "lucide-react";
-import SthLogo from "../../assets/icon/Sth_W.svg";
-import WebMedia6Logo from "../../assets/icon/web media 6.svg";
+import SthLogo from "../../assets/webpicon/Sth_W.webp";
+import WebMedia6Logo from "../../assets/webpicon/web media 6.webp";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();

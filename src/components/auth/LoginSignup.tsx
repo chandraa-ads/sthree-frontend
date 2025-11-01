@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { X, ArrowLeft } from "lucide-react";
-import introBanner from "../../assets/icon/intro1.png";
-import sreeLogo from "../../assets/icon/Sth_W.svg"; // ✅ your logo image
+import introBanner from "../../assets/webpicon/intro1.webp";
+import sreeLogo from "../../assets/webpicon/Sth_W.webp"; // ✅ your logo image
 
 interface Props {
   isOpen: boolean;
