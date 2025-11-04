@@ -85,7 +85,9 @@ function App() {
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/userprofile" element={<UserProfile />} />
                     <Route path="/category/:main_category" element={<CategoryPage />} />
-                    <Route path="/login" element={<LoginSignup isOpen={false} onClose={() => {}} />} />
+                    <Route path="/login" element={<LoginSignup isOpen={false} onClose={() => { } } setIsLoggedIn={function (loggedIn: boolean, name?: string): void {
+                      throw new Error("Function not implemented.");
+                    } } />} />
                     <Route path="/wishlist" element={<WishlistPage />} />
                     <Route path="/cart" element={<ShoppingCart />} />
                     <Route path="/search" element={<SearchResultsPage />} />

@@ -34,7 +34,7 @@ export default function Navbar() {
   const categories = [
     { name: "SAREE", icon: sareeIcon },
     { name: "SALWAR", icon: salwarIcon },
-    { name: "TOP & KURTHI", icon: kuruthaIcon },
+    { name: "TOP & KURTI", icon: kuruthaIcon },
     { name: "KIDS WEAR", icon: kidsIcon },
     { name: "NEW BORN ", icon: kidsIcon },
     { name: "HOME WEAR", icon: homeIcon },

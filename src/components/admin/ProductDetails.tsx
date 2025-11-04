@@ -46,6 +46,7 @@ export function ProductDetail() {
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; token: string } | null>(null);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [selectedColorIndex, setSelectedColorIndex] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -99,16 +100,24 @@ export function ProductDetail() {
       setError(null);
 
       const productData = await productService.getProductById(productId);
-      setProduct(productData);
 
-      if (productData.variants && productData.variants.length > 0) {
-        const firstVariant = productData.variants[0];
+      // 🧩 Filter out variants with 0 stock
+      const filteredVariants = productData.variants?.filter(
+        (v: ProductVariant) => v.stock && v.stock > 0
+      ) || [];
+
+      const updatedProduct = { ...productData, variants: filteredVariants };
+      setProduct(updatedProduct);
+
+      // Set default variant (first in stock)
+      if (filteredVariants.length > 0) {
+        const firstVariant = filteredVariants[0];
         setSelectedVariant(firstVariant);
         const sizes = getAvailableSizesForVariant(firstVariant, productData);
         if (sizes.length > 0) setSelectedSize(sizes[0]);
       }
 
-      // Always fetch reviews from API
+      // Reviews
       await loadRatings(productId);
 
       // Related products
@@ -264,12 +273,23 @@ export function ProductDetail() {
   };
 
   // Change variant
-  const handleVariantChange = (variant: ProductVariant) => {
+  const handleVariantChange = (variant: ProductVariant, index: number) => {
     setSelectedVariant(variant);
+    setSelectedColorIndex(index);
+
     const sizes = getAvailableSizesForVariant(variant, product!);
     setSelectedSize(sizes.length > 0 ? sizes[0] : "");
-    setSelectedImageIndex(0);
+
+    // If variant has images, use its first one; otherwise use product’s indexed image
+    if (variant.images && variant.images.length > 0) {
+      setSelectedImageIndex(0);
+    } else if (product?.images[index]) {
+      setSelectedImageIndex(index);
+    } else {
+      setSelectedImageIndex(0);
+    }
   };
+
 
   if (isLoading)
     return (
@@ -325,7 +345,7 @@ export function ProductDetail() {
       <div className="max-w-6xl mx-auto px-4 py-8 grid lg:grid-cols-2 gap-12 min-h-[800px]">
         {/* Images */}
         <div className="space-y-4">
-          <motion.div className="relative overflow-hidden rounded-lg bg-gray-100 w-[85%] mx-auto h-[750px] sm:h-[800px] lg:h-[850px]">
+          <motion.div className="relative overflow-hidden rounded-lg bg-gray-100 w-[100%] mx-auto h-[750px] sm:h-[800px] lg:h-[850px]">
             <img
               src={product.images[selectedImageIndex] || "/default-product.png"}
               alt={product.name}
@@ -406,80 +426,75 @@ export function ProductDetail() {
 
 
 
-          <div className="grid grid-cols-1 gap-6 mb-0"> {/* removed mb-4 */}
-            {/* Color Column */}
-            {product.variants?.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-1 text-sm">Color</h3>
-                <div className="flex flex-row gap-1.5 overflow-x-auto">
-                  {product.variants.map((variant) => (
-                    <button
-                      key={variant.id}
-                      onClick={() => handleVariantChange(variant)}
-                      className={`px-2.5 py-1.5 border rounded-md text-xs ${selectedVariant?.id === variant.id
-                        ? "border-pink-600 bg-pink-50"
-                        : "border-gray-300"
-                        }`}
-                    >
-                      {variant.color}
-                    </button>
-                  ))}
+          <div className="grid grid-cols-1 gap-6 mb-0">
+            {/* 🧩 Stock Validation */}
+            {(
+              !product.variants ||
+              product.variants.length === 0 ||
+              product.variants.every(
+                (v) => Number(v.stock) <= 0 || isNaN(Number(v.stock))
+              )
+            ) && (
+                <p className="text-red-500 text-sm font-medium">
+                  This product is currently out of stock.
+                </p>
+              )}
+
+            {/* 🎨 Color Column */}
+            {product.variants?.length > 0 &&
+              product.variants.some((v) => v.color && v.color.trim() !== "") && (
+                <div>
+                  <h3 className="font-semibold mb-1 text-sm">Color</h3>
+                  <div className="flex flex-row gap-1.5 overflow-x-auto">
+                    {product.variants
+                      .filter((v) => v.color && v.color.trim() !== "")
+                      .map((variant, index) => (
+                        <button
+                          key={variant.id || index}
+                          onClick={() => handleVariantChange(variant, index)}
+                          className={`px-2.5 py-1.5 border rounded-md text-xs transition-all duration-200 ${selectedColorIndex === index
+                              ? "border-pink-600 bg-pink-50 text-pink-700 font-medium"
+                              : "border-gray-300 text-gray-700 hover:border-pink-400"
+                            }`}
+                        >
+                          {variant.color}
+                          {selectedColorIndex === index && (
+                            <span className="ml-1 text-xs text-pink-600 font-semibold">
+                              (Selected)
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-
-            {/* Size Column */}
+            {/* 📏 Size Column */}
             {(() => {
               const adultSizes = [
-                "Free | Universal",
-                "XS | 34",
-                "S | 36",
-                "M | 38",
-                "L | 40",
-                "XL | 42",
-                "2XL | 44",
-                "3XL | 46",
-                "4XL | 48",
-                "5XL | 50",
+                "Free | Universal", "XS | 34", "S | 36", "M | 38", "L | 40",
+                "XL | 42", "2XL | 44", "3XL | 46", "4XL | 48", "5XL | 50",
               ];
-
               const babySizes = [
-                "0-3 M | Baby",
-                "3-6 M | Baby",
-                "6-9 M | Baby",
-                "9-12 M | Baby",
-                "12-18 M | Baby",
-                "18-24 M | Baby",
-                "2-3 Y | Baby",
-                "3-4 Y | Baby",
+                "0-3 M | Baby", "3-6 M | Baby", "6-9 M | Baby", "9-12 M | Baby",
+                "12-18 M | Baby", "18-24 M | Baby", "2-3 Y | Baby", "3-4 Y | Baby",
                 "4-5 Y | Baby",
               ];
-
               const kidsSizes = [
-                "5-6 Y | Kids",
-                "6-7 Y | Kids",
-                "7-8 Y | Kids",
-                "8-9 Y | Kids",
-                "9-10 Y | Kids",
-                "10-11 Y | Kids",
-                "11-12 Y | Kids",
-                "12-13 Y | Kids",
-                "13-14 Y | Kids",
-                "14-15 Y | Kids",
+                "5-6 Y | Kids", "6-7 Y | Kids", "7-8 Y | Kids", "8-9 Y | Kids",
+                "9-10 Y | Kids", "10-11 Y | Kids", "11-12 Y | Kids", "12-13 Y | Kids",
+                "13-14 Y | Kids", "14-15 Y | Kids",
               ];
 
               let allSizes: string[] = [];
 
-              // Category-based size logic
-              if (product.main_category?.toLowerCase() === "saree") {
+              const category = product.main_category?.toLowerCase() || "";
+
+              if (category === "saree" || category === "accessories") {
                 allSizes = ["Free | Universal"];
-              } else if (product.main_category?.toLowerCase() === "kids") {
+              } else if (category === "kids") {
                 allSizes = [...babySizes, ...kidsSizes];
-              } else if (
-                product.main_category?.toLowerCase() === "new born" ||
-                product.main_category?.toLowerCase() === "baby"
-              ) {
+              } else if (["new born", "baby"].includes(category)) {
                 allSizes = [...babySizes];
               } else {
                 allSizes = [...adultSizes];
@@ -487,12 +502,13 @@ export function ProductDetail() {
 
               const availableSizes = getAvailableSizes();
 
+              if (!availableSizes || availableSizes.length === 0) return null;
+
               return (
                 <div>
                   <h3 className="font-semibold mb-1">Size</h3>
                   <div className="flex flex-row flex-wrap gap-2">
                     {allSizes.map((size) => {
-                      // ✅ Partial match check (case-insensitive)
                       const isAvailable = availableSizes.some((s) =>
                         s.toLowerCase().includes(size.split("|")[0].trim().toLowerCase())
                       );
@@ -503,11 +519,11 @@ export function ProductDetail() {
                           onClick={() => isAvailable && setSelectedSize(size)}
                           disabled={!isAvailable}
                           className={`px-3 py-1.5 border rounded-lg text-sm transition 
-                ${selectedSize === size
+                  ${selectedSize === size
                               ? "border-pink-600 bg-pink-50 text-pink-700"
                               : "border-gray-300"
                             } 
-                ${!isAvailable
+                  ${!isAvailable
                               ? "opacity-50 cursor-not-allowed bg-gray-100"
                               : "hover:border-pink-400"
                             }`}
@@ -520,10 +536,6 @@ export function ProductDetail() {
                 </div>
               );
             })()}
-
-
-
-
           </div>
 
           {/* About / Description / Product Details */}
@@ -547,8 +559,8 @@ export function ProductDetail() {
             {/* Product Details */}
             {product.product_detail && (
               <div className="mb-6">
-                <h4 className="text-2xl font-semibold mb-2 text-gray-900">Product Details</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-1 gap-x-6 text-gray-700">
+                <h4 className="text-2xl font-semibold mb-3 text-gray-900">Product Details</h4>
+                <div className="flex flex-col gap-2 text-gray-700">
                   {(() => {
                     let productDetails: Record<string, any> = {};
 
@@ -556,6 +568,7 @@ export function ProductDetail() {
                       try {
                         productDetails = JSON.parse(product.product_detail);
                       } catch {
+                        // Handle comma-separated key:value pairs
                         product.product_detail.split(",").forEach((item) => {
                           const [key, value] = item.split(":");
                           if (key && value) productDetails[key.trim()] = value.trim();
@@ -568,18 +581,19 @@ export function ProductDetail() {
                     return Object.entries(productDetails).map(([key, value]) => (
                       <div
                         key={key}
-                        className="text-sm flex items-center"
+                        className="flex flex-wrap items-start border-b border-gray-100 pb-1"
                       >
-                        <span className="font-semibold text-gray-900 capitalize">
-                          {key.replace(/_/g, " ")} :
+                        <span className="font-semibold text-gray-900 capitalize mr-2">
+                          {key.replace(/_/g, " ")}
                         </span>
-                        <span className="ml-1 text-gray-700">{String(value)}</span>
+                        <span className="text-gray-700 break-words">{String(value)}</span>
                       </div>
                     ));
                   })()}
                 </div>
               </div>
             )}
+
 
 
             {/* Actions */}

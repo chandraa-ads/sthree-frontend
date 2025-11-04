@@ -148,63 +148,73 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
 
   // Add this function inside ProductCard (replace your old handleBuyNow)
-  const handleBuyNow = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!product) return;
+  // ✅ Updated handleBuyNow function
+ const handleBuyNow = async (e: React.MouseEvent) => {
+  e.stopPropagation();
 
-    if (availableStock <= 0) {
-      alert("⚠️ Out of stock");
-      return;
-    }
+  if (!product) return;
+  if (availableStock <= 0) {
+    alert("⚠️ Out of stock");
+    return;
+  }
 
-    const loggedUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
-    if (!loggedUser?.id) {
-      alert("🔒 Please log in first");
-      return;
-    }
+  const loggedUser = JSON.parse(localStorage.getItem("loggedInUser") || "null");
+  if (!loggedUser?.id) {
+    alert("🔒 Please log in first");
+    return;
+  }
 
-    // ✅ Select default size and color
-    const variantSizes = selectedVariant?.size ? JSON.parse(selectedVariant.size) : [];
-    const productSizes =
-      (!variantSizes.length && product?.variants?.[0]?.size)
-        ? JSON.parse(product.variants[0].size)
-        : [];
-    const selectedSize = variantSizes[0] || productSizes[0] || "";
+  // ✅ FIXED version (no JSON.parse on arrays)
+  const variantSizes = Array.isArray(selectedVariant?.size)
+    ? selectedVariant?.size
+    : selectedVariant?.size
+      ? JSON.parse(selectedVariant.size)
+      : [];
 
-    const productColors = product.variants?.map(v => v.color).filter(Boolean) || [];
-    const selectedColor = selectedVariant?.color || productColors[0] || "Default";
+  const productSizes =
+    !variantSizes.length && product?.variants?.[0]?.size
+      ? Array.isArray(product.variants[0].size)
+        ? product.variants[0].size
+        : JSON.parse(product.variants[0].size)
+      : [];
 
-    // ✅ Pick correct image
-    const selectedImage =
-      displayedImages[selectedImageIndex] ||
-      displayedImages[0] ||
-      "/default-product.png";
+  const selectedSize = variantSizes[0] || productSizes[0] || "";
+  const productColors = product.variants?.map(v => v.color).filter(Boolean) || [];
+  const selectedColor = selectedVariant?.color || productColors[0] || "Default";
 
-    // ✅ Build product data with image
-    const fullProductData = {
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      category: product.main_category,
-      sub_category: product.sub_category,
-      price: selectedVariant?.price || product.price,
-      original_price: product.original_price,
-      discount_percentage: product.discount_percentage,
-      color: selectedColor,
-      size: selectedSize,
-      image_url: selectedImage, // 🖼️ added image here
-      variant_id: selectedVariant?.id || null,
-      variant_name: selectedVariant?.name || "",
-      stock: availableStock,
-      quantity: 1,
-    };
+  const selectedImage =
+    displayedImages[selectedImageIndex] ||
+    displayedImages[0] ||
+    "/default-product.png";
 
-    // ✅ Save product info for checkout
-    localStorage.setItem("buyNowProduct", JSON.stringify(fullProductData));
-
-    // ✅ Go to checkout page
-    navigate("/checkout");
+  const cartItem = {
+    id: crypto.randomUUID(),
+    product_id: product.id,
+    product_variant_id: selectedVariant?.id || null,
+    name: product.name,
+    image_url: selectedImage,
+    price: selectedVariant?.price || product.price,
+    quantity: 1,
+    color: selectedColor,
+    size: selectedSize,
+    variant_name: selectedVariant?.name || "",
   };
+
+  try {
+    // ✅ Add to cart like Quick Add
+    await addItem(cartItem as any);
+
+    // ✅ Optionally open the cart drawer if you want visual feedback
+    openCartDrawer();
+
+    // ✅ Then redirect to /cart
+    navigate("/cart");
+  } catch (err) {
+    console.error("Failed to add to cart:", err);
+    alert("❌ Failed to proceed. Please try again.");
+  }
+};
+
 
 
   // Add to cart
@@ -221,11 +231,20 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       return;
     }
 
-    const variantSizes = selectedVariant?.size ? JSON.parse(selectedVariant.size) : [];
-    const productSizes =
-      (!variantSizes.length && product?.variants?.[0]?.size)
-        ? JSON.parse(product.variants[0].size)
+    // ✅ FIXED version (no JSON.parse on arrays)
+    const variantSizes = Array.isArray(selectedVariant?.size)
+      ? selectedVariant?.size
+      : selectedVariant?.size
+        ? JSON.parse(selectedVariant.size)
         : [];
+
+    const productSizes =
+      !variantSizes.length && product?.variants?.[0]?.size
+        ? Array.isArray(product.variants[0].size)
+          ? product.variants[0].size
+          : JSON.parse(product.variants[0].size)
+        : [];
+
     const selectedSize = variantSizes[0] || productSizes[0] || "";
     const productColors = product.variants?.map(v => v.color).filter(Boolean) || [];
     const selectedColor = selectedVariant?.color || productColors[0] || "Default";

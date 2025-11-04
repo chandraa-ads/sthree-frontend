@@ -153,7 +153,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
- <Helmet>
+      <Helmet>
         <title>Home | SthRee Collections</title>
         <meta
           name="description"
@@ -190,10 +190,10 @@ export function Home() {
 
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col h-[calc(100vh-120px)]">
             {/* Sticky Search & Sort */}
             {isSearchVisible && (
-              <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm px-4 py-3">
+              <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3">
                 <div className="flex flex-wrap items-center gap-3">
                   {/* Sort Dropdown */}
                   <SortDropdown value={sortBy} onChange={setSortBy} />
@@ -227,22 +227,32 @@ export function Home() {
               </div>
             )}
 
-            {/* Products Grid (Scrollable) */}
-            <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-6">              {isSearching
-              ? [...Array(10)].map((_, index) => <ProductCardSkeleton key={index} />)
-              : filteredProducts.map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
-              ))}
-            </div>
-
-            {filteredProducts.length === 0 && !isSearching && (
-              <div className="text-center py-16">
-                <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-                <p className="text-gray-600">Try adjusting your filters or search terms</p>
+            {/* Product Grid Area - Scrollable */}
+            <div className="flex-1 overflow-y-auto px-1 sm:px-2 lg:px-4 pb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {isSearching
+                  ? [...Array(10)].map((_, index) => (
+                    <ProductCardSkeleton key={index} />
+                  ))
+                  : filteredProducts.map((product, index) => (
+                    <ProductCard key={product.id} product={product} index={index} />
+                  ))}
               </div>
-            )}
+
+              {filteredProducts.length === 0 && !isSearching && (
+                <div className="text-center py-16">
+                  <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    No products found
+                  </h3>
+                  <p className="text-gray-600">
+                    Try adjusting your filters or search terms
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
+
         </div>
 
       )}

@@ -329,7 +329,7 @@ export default function UserDashboard({ userId: propUserId }: UserDashboardProps
                         <Truck className="w-4 h-4 text-pink-600" /> {order.status || "Processing"}
                       </p>
                       <p className="text-lg font-semibold text-pink-700">
-                        Total: ₹{order.total_amount?.toLocaleString() || "0"}
+                        {/* Total: ₹{order.total_amount?.toLocaleString() || "0"} */}
                       </p>
                     </div>
                   </div>

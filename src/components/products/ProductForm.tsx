@@ -62,6 +62,21 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
   const [discountPercentage, setDiscountPercentage] = useState<number | "">(
     product?.discount_percentage || 0
   );
+
+  useEffect(() => {
+  if (!product?.discount_start_date && !product?.discount_end_date) {
+    const today = new Date();
+    const tenDaysLater = new Date(today);
+    tenDaysLater.setDate(today.getDate() + 10);
+
+    // Format as YYYY-MM-DD for <input type="date" />
+    const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+    setDiscountStartDate(formatDate(today));
+    setDiscountEndDate(formatDate(tenDaysLater));
+  }
+}, [product]);
+
   const [stock, setStock] = useState<number | "">(product?.stock || "");
   const [category, setCategory] = useState(product?.category || "Accessories");
   const [mainCategory, setMainCategory] = useState(

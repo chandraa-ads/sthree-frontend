@@ -4,15 +4,17 @@ import { Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ShoppingCart: React.FC = () => {
   const { cartItems, updateCartItem, removeItem } = useCart();
+  const navigate = useNavigate();
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + Number(item.price) * item.quantity,
     0
   );
-  const deliveryFee = cartItems.length > 0 ? 50 : 0;
+  const deliveryFee = cartItems.length > 0 ? (subtotal >= 1000 ? 0 : 50) : 0;
   const totalAmount = subtotal + deliveryFee;
   const { main_category } = useParams();
   const formatted = main_category?.replace(/-/g, " ") || "Category";
@@ -111,19 +113,19 @@ const ShoppingCart: React.FC = () => {
                           +
                         </button>
                         <button
-                        onClick={() => removeItem(item.id)}
-                        className="text-red-500 hover:text-red-600 transition ml-10"
-                        title="Remove item"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                          onClick={() => removeItem(item.id)}
+                          className="text-red-500 hover:text-red-600 transition ml-10"
+                          title="Remove item"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </div>
 
                     {/* Right side: Amount + Delete */}
                     <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-end gap-2 mt-2 sm:mt-0">
-                      
-                      
+
+
                       <span className="font-semibold text-gray-800">
                         ₹{(Number(item.price) * item.quantity).toFixed(2)}
                       </span>
@@ -149,7 +151,7 @@ const ShoppingCart: React.FC = () => {
               </div>
               <div className="flex justify-between">
                 <span>Delivery Fee</span>
-                <span>₹{deliveryFee.toFixed(2)}</span>
+                <span>{deliveryFee === 0 ? "Free" : `₹${deliveryFee.toFixed(2)}`}</span>
               </div>
               <div className="border-t pt-3 flex justify-between font-semibold text-lg">
                 <span>Total</span>
@@ -159,10 +161,21 @@ const ShoppingCart: React.FC = () => {
 
             <button
               className="w-full mt-6 bg-black text-white py-3 rounded-lg hover:bg-gray-800 transition"
-              onClick={() => alert("Proceeding to checkout...")}
+              onClick={() => {
+                // Save all cart data to localStorage before navigating
+                localStorage.setItem("checkoutData", JSON.stringify({
+                  cartItems,
+                  subtotal,
+                  totalAmount,
+                  deliveryFee,
+                }));
+
+                navigate("/checkout");
+              }}
             >
               Proceed to Checkout
             </button>
+
           </div>
         )}
       </div>
