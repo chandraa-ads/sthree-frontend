@@ -224,7 +224,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess }) => {
 
   const token = localStorage.getItem("adminToken");
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+    import.meta.env.VITE_API_BASE_URL || "https://nettly-indebted-kurtis.ngrok-free.dev";
 
   useEffect(() => {
     if (originalPrice !== "" && discountPercentage !== "") {

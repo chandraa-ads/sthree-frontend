@@ -1,7 +1,7 @@
 import axios from "axios";
 import { CartItem } from "../../contexts/CartContext";
 
-const API_BASE = "http://localhost:3000"; // backend URL
+const API_BASE = "https://nettly-indebted-kurtis.ngrok-free.dev"; // backend URL
 
 export const cartService = {
   async getCart(user_id: string) {
@@ -54,6 +54,6 @@ export const addToCart = async (item: CartItem, user_id: string) => {
 
   console.log("POST /cart payload:", payload);
 
-  return axios.post("http://localhost:3000/cart", payload);
+  return axios.post("https://nettly-indebted-kurtis.ngrok-free.dev/cart", payload);
 };
 

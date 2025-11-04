@@ -22,7 +22,7 @@ const UsersTable: React.FC = () => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:3000/admin/users");
+        const response = await axios.get("https://nettly-indebted-kurtis.ngrok-free.dev/admin/users");
         setUsers(response.data);
       } catch (err) {
         console.error(err);

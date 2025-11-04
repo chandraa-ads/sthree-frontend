@@ -103,7 +103,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/auth/user/register", {
+      const res = await fetch("https://nettly-indebted-kurtis.ngrok-free.dev/auth/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -138,7 +138,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/auth/user/verify-otp", {
+      const res = await fetch("https://nettly-indebted-kurtis.ngrok-free.dev/auth/user/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp: otpInput }),
@@ -162,7 +162,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
   const handleGoogleResponse = async (response: any) => {
     const token = response.credential;
     try {
-      const res = await fetch("http://localhost:3000/auth/user/google", {
+      const res = await fetch("https://nettly-indebted-kurtis.ngrok-free.dev/auth/user/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken: token }),
@@ -198,7 +198,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
 
     try {
       const res = await fetch(
-        "http://localhost:3000/auth/user/forgot-password",
+        "https://nettly-indebted-kurtis.ngrok-free.dev/auth/user/forgot-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -225,7 +225,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
 
     try {
       const res = await fetch(
-        "http://localhost:3000/auth/user/reset-password",
+        "https://nettly-indebted-kurtis.ngrok-free.dev/auth/user/reset-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -271,7 +271,7 @@ const LoginSignup: React.FC<Props> = ({ isOpen, onClose, setIsLoggedIn }) => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/auth/user/login", {
+      const res = await fetch("https://nettly-indebted-kurtis.ngrok-free.dev/auth/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: emailInput, password: passwordInput }),

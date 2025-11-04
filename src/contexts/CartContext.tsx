@@ -44,7 +44,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user?.id) return;
 
     try {
-      const { data } = await axios.get("http://localhost:3000/cart", {
+      const { data } = await axios.get("https://nettly-indebted-kurtis.ngrok-free.dev/cart", {
         params: { user_id: user.id },
       });
       setCartItems(data.cart_items || []);
@@ -63,7 +63,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 const addItem = async (newItem: CartItem) => {
   try {
     const payload = { ...newItem, user_id: user.id };
-    const { data } = await axios.post("http://localhost:3000/cart", payload);
+    const { data } = await axios.post("https://nettly-indebted-kurtis.ngrok-free.dev/cart", payload);
     setCartItems(data.cart_items || []);  // ✅ updates state from backend response
     openCartDrawer();
   } catch(err: any) {
@@ -90,7 +90,7 @@ const addItem = async (newItem: CartItem) => {
       };
 
       const { data } = await axios.patch(
-        `http://localhost:3000/cart/${item.id}`,
+        `https://nettly-indebted-kurtis.ngrok-free.dev/cart/${item.id}`,
         payload
       );
 
@@ -107,7 +107,7 @@ const addItem = async (newItem: CartItem) => {
    ---------------------------- */
   const removeItem = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:3000/cart/${id}`, {
+      await axios.delete(`https://nettly-indebted-kurtis.ngrok-free.dev/cart/${id}`, {
         params: { user_id: user.id },
       });
       setCartItems((prev) => prev.filter((i) => i.id !== id));
@@ -121,7 +121,7 @@ const addItem = async (newItem: CartItem) => {
    ---------------------------- */
   const clearCart = async () => {
     try {
-      await axios.delete(`http://localhost:3000/cart/clear/${user.id}`);
+      await axios.delete(`https://nettly-indebted-kurtis.ngrok-free.dev/cart/clear/${user.id}`);
       setCartItems([]);
     } catch (err: any) {
       console.error("Error clearing cart:", err.response?.data || err.message);

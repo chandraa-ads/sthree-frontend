@@ -47,7 +47,7 @@ export default function UserDashboard({ userId: propUserId }: UserDashboardProps
       if (!userId || !token) return;
 
       try {
-        const res = await fetch(`http://localhost:3000/users/${userId}`, {
+        const res = await fetch(`https://nettly-indebted-kurtis.ngrok-free.dev/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch user");
@@ -92,7 +92,7 @@ export default function UserDashboard({ userId: propUserId }: UserDashboardProps
     const fetchOrders = async () => {
       if (!userId) return;
       try {
-        const res = await fetch(`http://localhost:3000/orders/my/${userId}`, {
+        const res = await fetch(`https://nettly-indebted-kurtis.ngrok-free.dev/orders/my/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch orders");
@@ -114,7 +114,7 @@ export default function UserDashboard({ userId: propUserId }: UserDashboardProps
           const img = new Image();
           img.src = item.image_url.startsWith("http")
             ? item.image_url
-            : `http://localhost:3000${item.image_url}`;
+            : `https://nettly-indebted-kurtis.ngrok-free.dev${item.image_url}`;
         }
       });
     });
@@ -149,7 +149,7 @@ export default function UserDashboard({ userId: propUserId }: UserDashboardProps
       }
       if (photoFile) formData.append("profile_photo", photoFile);
 
-      const res = await fetch("http://localhost:3000/users/update-profile", {
+      const res = await fetch("https://nettly-indebted-kurtis.ngrok-free.dev/users/update-profile", {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -294,7 +294,7 @@ export default function UserDashboard({ userId: propUserId }: UserDashboardProps
                               item.image_url
                                 ? item.image_url.startsWith("http")
                                   ? item.image_url
-                                  : `http://localhost:3000${item.image_url}`
+                                  : `https://nettly-indebted-kurtis.ngrok-free.dev${item.image_url}`
                                 : "https://cdn-icons-png.flaticon.com/512/2748/2748558.png"
                             }
                             alt={item.product_name}

@@ -20,7 +20,7 @@ export function WishlistPage() {
         }
 
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/products/user/${storedUser.id}/wishlist`,
+          `${import.meta.env.VITE_API_URL || "https://nettly-indebted-kurtis.ngrok-free.dev"}/products/user/${storedUser.id}/wishlist`,
           {
             headers: {
               Authorization: `Bearer ${storedUser.token}`,

@@ -116,7 +116,7 @@ export default function Checkout() {
         }
       });
 
-      const res = await fetch("http://localhost:3000/orders", {
+      const res = await fetch("https://nettly-indebted-kurtis.ngrok-free.dev/orders", {
         method: "POST",
         body: formData,
       });

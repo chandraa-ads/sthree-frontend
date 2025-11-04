@@ -18,7 +18,7 @@ const ModernAdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:3000/auth/admin/login", {
+      const response = await axios.post("https://nettly-indebted-kurtis.ngrok-free.dev/auth/admin/login", {
         email,
         password,
       });

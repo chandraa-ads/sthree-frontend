@@ -23,7 +23,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/admin/dashboard");
+        const response = await axios.get("https://nettly-indebted-kurtis.ngrok-free.dev/admin/dashboard");
         setStats(response.data);
       } catch (err) {
         console.error("Failed to fetch dashboard stats:", err);

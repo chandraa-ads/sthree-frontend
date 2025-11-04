@@ -44,7 +44,7 @@ export default function AdminOrders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:3000/orders/admin/all");
+      const res = await axios.get("https://nettly-indebted-kurtis.ngrok-free.dev/orders/admin/all");
       setOrders(res.data);
     } catch (err) {
       console.error("❌ Failed to load orders:", err);
@@ -60,7 +60,7 @@ export default function AdminOrders() {
 
     try {
       const res = await axios.post(
-        `http://localhost:3000/orders/admin/confirm/${orderId}`
+        `https://nettly-indebted-kurtis.ngrok-free.dev/orders/admin/confirm/${orderId}`
       );
 
       alert(res.data.message || "Order confirmed successfully!");
@@ -75,7 +75,7 @@ export default function AdminOrders() {
   const exportOrders = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:3000/orders/admin/export",
+        "https://nettly-indebted-kurtis.ngrok-free.dev/orders/admin/export",
         { responseType: "blob" }
       );
       const url = window.URL.createObjectURL(new Blob([response.data]));

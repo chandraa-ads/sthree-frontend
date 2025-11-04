@@ -14,7 +14,7 @@ export default function CategoryPage() {
     setLoading(true);
 
     fetch(
-      `http://localhost:3000/products/search/by-category?main_category=${main_category}`
+      `https://nettly-indebted-kurtis.ngrok-free.dev/products/search/by-category?main_category=${main_category}`
     )
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch products");
